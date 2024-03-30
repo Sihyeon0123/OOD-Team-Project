@@ -60,6 +60,11 @@ td#subject {
     margin: 100px 10px 100px 10px;
 }
 
+#withdrawal_form {
+    text-align: center;
+    margin: 100px 10px 100px 10px;
+}
+
 #login_fail {
     color: fuchsia;
     margin: 100px 200px 100px 200px;

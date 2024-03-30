@@ -64,6 +64,38 @@ public class SystemController {
         return "/index";
     }
 
+    @GetMapping("/withdrawal")
+    public String withdrawal() {
+        return "withdrawal"; // withdrawal.jsp로 이동
+    }
+
+    @PostMapping("/withdrawal.do")
+    public String withdrawalDo(RedirectAttributes attrs) {
+        String userid = (String)session.getAttribute("userid");
+        String userSecret = (String)session.getAttribute("password");
+        String passwd = request.getParameter("passwd");
+        log.debug("withdrawal.do called...");
+        if(userSecret.equals(passwd)){
+            log.debug("({})withdrawal.do succeeded.", userid);
+            try {
+                String cwd = ctx.getRealPath(".");
+                UserAdminAgent agent = new UserAdminAgent(JAMES_HOST, JAMES_CONTROL_PORT, cwd,
+                        ROOT_ID, ROOT_PASSWORD, ADMINISTRATOR);
+                agent.deleteUser(userid);  // 수정!!!
+            } catch (Exception ex) {
+                log.error("withdrawal.do : 예외 = {}", ex);
+            }
+            attrs.addFlashAttribute("msg", String.format("사용자(%s) 회원 탈퇴 성공하였습니다.", userid));
+            session.invalidate();
+            return "redirect:/";
+        }
+        else{
+            log.debug("({})withdrawal.do failed...", userid);
+            attrs.addFlashAttribute("msg", String.format("사용자(%s) 회원 탈퇴를 실패하였습니다.", userid));
+            return "redirect:/withdrawal"; // withdrawal.jsp로 이동
+        }
+    }
+
     /** 회원가입 페이지 반환 메서드 */
     @GetMapping("/signup")
     public String redirectToSignUpPage() {

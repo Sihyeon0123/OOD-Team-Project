@@ -181,6 +181,41 @@ public class UserAdminAgent {
         return userList;
     } // parseUserList()
 
+    public boolean deleteUser(String userid) {
+        byte[] messageBuffer = new byte[1024];
+        boolean status = false;
+        String command;
+        String recvMessage;
+
+        if (!isConnected) {
+            return status;
+        }
+
+        try {
+
+            command = "deluser " + userid + EOL;
+            os.write(command.getBytes());
+            log.debug(command);
+
+            // 2: 응답 메시지 수신
+            java.util.Arrays.fill(messageBuffer, (byte) 0);
+            is.read(messageBuffer);
+
+            // 3: 응답 메시지 분석
+            recvMessage = new String(messageBuffer);
+            log.debug("recvMessage = {}", recvMessage);
+            if (recvMessage.contains("deleted")) {
+                status = true;
+            }
+
+            quit();
+        } catch (Exception ex) {
+            log.error("deleteUsers(): 예외 = {}", ex.getMessage());
+        } finally {
+            return status;
+        }
+    }
+
     public boolean deleteUsers(String[] userList) {
         byte[] messageBuffer = new byte[1024];
         String command;
