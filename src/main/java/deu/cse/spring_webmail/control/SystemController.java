@@ -10,24 +10,21 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import javax.imageio.ImageIO;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.catalina.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 /**
@@ -65,6 +62,61 @@ public class SystemController {
         session.setAttribute("debug", "false");
 
         return "/index";
+    }
+
+    /** 회원가입 페이지 반환 메서드 */
+    @GetMapping("/signup")
+    public String redirectToSignUpPage() {
+        return "signup"; // signup.jsp로 이동
+    }
+
+    /**ID의 중복확인 메서드*/
+    @PostMapping("/isUserIDDuplicate")
+    @ResponseBody
+    public Map<String, Boolean> isUserIDDuplicate(@RequestBody Map<String, String> request){
+        String userid = request.get("userid");
+        String cwd = ctx.getRealPath(".");
+        boolean isDuplicate = true;
+        
+        UserAdminAgent agent = new UserAdminAgent(JAMES_HOST, JAMES_CONTROL_PORT, cwd,
+                                                  ROOT_ID, ROOT_PASSWORD, ADMINISTRATOR);
+        isDuplicate = agent.isUserIDDuplicate(userid);
+
+        Map<String, Boolean> result = new HashMap<>();
+        result.put("duplicate", isDuplicate);
+        return result;
+    }
+
+    /** 회원가입 수행 메서드*/
+    @PostMapping("/signup.do")
+    public String signUpDo(RedirectAttributes attrs) {
+        String userid = request.getParameter("userid");
+        String passwd = request.getParameter("passwd");
+        String repasswd = request.getParameter("repasswd");
+        log.debug("signUpDo() called...\n{}",attrs);
+
+        // 비밀번호 확인
+        if(passwd.equals(repasswd) && !passwd.isEmpty()){
+            attrs.addFlashAttribute("msg", String.format("회원가입에 성공하였습니다."));
+            // 중복 제거 가능성
+            try {
+                String cwd = ctx.getRealPath(".");
+                UserAdminAgent agent = new UserAdminAgent(JAMES_HOST, JAMES_CONTROL_PORT, cwd,
+                        ROOT_ID, ROOT_PASSWORD, ADMINISTRATOR);
+
+                if (agent.addUser(userid, passwd)) {
+                    attrs.addFlashAttribute("msg", String.format("사용자(%s) 추가를 성공하였습니다.", userid));
+                } else {
+                    attrs.addFlashAttribute("msg", String.format("사용자(%s) 추가를 실패하였습니다.", userid));
+                }
+            } catch (Exception ex) {
+                log.error("signup.do: 시스템 접속에 실패했습니다. 예외 = {}", ex.getMessage());
+            }
+            return "redirect:/";
+        }else{
+            attrs.addFlashAttribute("msg", String.format("비밀번호가 일치하지 않습니다."));
+            return "redirect:/signup";
+        }
     }
 
     @RequestMapping(value = "/login.do", method = {RequestMethod.GET, RequestMethod.POST})

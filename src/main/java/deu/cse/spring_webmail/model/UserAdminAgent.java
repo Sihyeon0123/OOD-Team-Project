@@ -57,6 +57,21 @@ public class UserAdminAgent {
 
         isConnected = connect();
     }
+    
+    /**아이디의 중복 여부를 확인하기 위한 메서드
+     * 중복되면 true 반환
+     */
+    public boolean isUserIDDuplicate(String userid){
+        List <String> users = getUserList();
+        // 아이디 중복 확인
+        if(users.isEmpty() || userid.isEmpty()){
+            return true;
+        } else if(users.contains(userid) || userid.equals("admin")) {
+            return true;
+        } else{
+            return false;
+        }
+    }
 
     /**
      *
