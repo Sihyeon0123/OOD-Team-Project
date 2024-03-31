@@ -121,6 +121,35 @@ public class UserAdminAgent {
         }
     }  // addUser()
 
+    public boolean changePassword(String userid, String currentPassword, String sessionPassword, String newPassword, String newPasswordConfirm){
+        boolean result = false;
+        byte[] messageBuffer = new byte[1024];
+
+        if(newPassword.equals(newPasswordConfirm) && currentPassword.equals(sessionPassword)){
+            try {
+                // 1: 명령 송신
+                String command = "setpassword " + userid + " " + newPassword + EOL;
+                os.write(command.getBytes());
+
+                // 2: 명령에 대한 응답 수신
+                java.util.Arrays.fill(messageBuffer, (byte) 0);
+                is.read(messageBuffer);
+
+                // 3: 응답 메시지 처리
+                String recvMessage = new String(messageBuffer);
+                log.debug("recvMessage = {}", recvMessage);
+
+                quit();
+            } catch (Exception ex) {
+                log.error("getUserList(): 예외 = {}", ex.getMessage());
+            }
+            finally {
+                result = true;
+            }
+        }
+        return result;
+    }
+
     public List<String> getUserList() {
         List<String> userList = new LinkedList<String>();
         byte[] messageBuffer = new byte[1024];

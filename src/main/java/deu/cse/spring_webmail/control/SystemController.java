@@ -65,6 +65,39 @@ public class SystemController {
         return "/index";
     }
 
+    @GetMapping("/change_password")
+    public String changePassword() {
+        return "change_password"; // withdrawal.jsp로 이동
+    }
+
+    @PostMapping("/change_password.do")
+    public String changePasswordDo(RedirectAttributes attrs) {
+        String userid = (String)session.getAttribute("userid");
+        String currentPassword = request.getParameter("currentPassword");
+        String sessionPassword = (String)session.getAttribute("password");;
+        String newPassword = request.getParameter("newPassword");
+        String newPasswordConfirm = request.getParameter("newPasswordConfirm");
+        boolean result = false;
+
+        try{
+            String cwd = ctx.getRealPath(".");
+            UserAdminAgent agent = new UserAdminAgent(JAMES_HOST, JAMES_CONTROL_PORT, cwd,
+                    ROOT_ID, ROOT_PASSWORD, ADMINISTRATOR);
+            result = agent.changePassword(userid, currentPassword, sessionPassword, newPassword, newPasswordConfirm);
+        } catch (Exception ex) {
+            log.error("withdrawal.do : 예외 = {}", ex);
+        }
+
+        if(result){
+            attrs.addFlashAttribute("msg", String.format("사용자(%s) 비밀번호 변경에 성공하였습니다.", userid));
+            session.invalidate();
+            return "redirect:/";
+        }else{
+            attrs.addFlashAttribute("msg", String.format("사용자(%s) 비밀번호 변경에 실패하였습니다.", userid));
+            return "redirect:change_password";
+        }
+    }
+
     @GetMapping("/withdrawal")
     public String withdrawal() {
         return "withdrawal"; // withdrawal.jsp로 이동
