@@ -58,12 +58,12 @@
 
 <div id="login_form">
     <h2>회원가입</h2>
-    <form method="POST" action="signup.do" onsubmit="return false;">
+    <form method="POST" action="signup.do">
         사용자: <input type="text" name="userid" size="20" id="id" autofocus><br /><label id="dupelabel"></label><br/>
         암&nbsp;&nbsp;&nbsp;호: <input type="password" name="passwd" size="20"> <br />
         재입력: <input type="password" name="repasswd" size="20"> <br /> <br />
         <input type="submit" value="회원가입" name="B1", id="submitbutt" disabled>&nbsp;&nbsp;&nbsp;
-        <input type="reset" value="다시 입력" name="B2" style="margin-right: 15px">
+        <input type="reset" value="다시 입력" name="B2" onclick="document.getElementById('submitbutt').disabled = true" style="margin-right: 15px">
     </form>
 </div>
 

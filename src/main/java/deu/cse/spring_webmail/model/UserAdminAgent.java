@@ -64,9 +64,7 @@ public class UserAdminAgent {
     public boolean isUserIDDuplicate(String userid){
         List <String> users = getUserList();
         // 아이디 중복 확인
-        if(users.isEmpty() || userid.isEmpty()){
-            return true;
-        } else if(users.contains(userid) || userid.equals("admin")) {
+        if (users.contains(userid) || userid.equals("admin")) {
             return true;
         } else{
             return false;

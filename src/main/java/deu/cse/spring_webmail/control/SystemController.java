@@ -27,6 +27,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+
 /**
  * 초기 화면과 관리자 기능(사용자 추가, 삭제)에 대한 제어기
  *
@@ -108,12 +109,11 @@ public class SystemController {
     public Map<String, Boolean> isUserIDDuplicate(@RequestBody Map<String, String> request){
         String userid = request.get("userid");
         String cwd = ctx.getRealPath(".");
-        boolean isDuplicate = true;
+        boolean isDuplicate;
         
         UserAdminAgent agent = new UserAdminAgent(JAMES_HOST, JAMES_CONTROL_PORT, cwd,
                                                   ROOT_ID, ROOT_PASSWORD, ADMINISTRATOR);
         isDuplicate = agent.isUserIDDuplicate(userid);
-
         Map<String, Boolean> result = new HashMap<>();
         result.put("duplicate", isDuplicate);
         return result;
