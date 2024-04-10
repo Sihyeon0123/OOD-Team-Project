@@ -10,12 +10,18 @@ import jakarta.mail.Folder;
 import jakarta.mail.Message;
 import jakarta.mail.Session;
 import jakarta.mail.Store;
+
+import java.io.File;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Properties;
+
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+
 
 /**
  *
@@ -30,12 +36,12 @@ public class Pop3Agent {
     @Getter @Setter private Store store;
     @Getter @Setter private String excveptionType;
     @Getter @Setter private HttpServletRequest request;
-    
+
     // 220612 LJM - added to implement REPLY
     @Getter private String sender;
     @Getter private String subject;
     @Getter private String body;
-    
+
     public Pop3Agent(String host, String userid, String password) {
         this.host = host;
         this.userid = userid;
@@ -56,7 +62,7 @@ public class Pop3Agent {
         }
     }
 
-    public boolean deleteMessage(int msgid, boolean really_delete) {
+    public boolean deleteMessage(int msgid, boolean really_delete, String userid, HttpServletRequest request, String DOWNLOAD_FOLDER) {
         boolean status = false;
 
         if (!connectToStore()) {
@@ -69,8 +75,40 @@ public class Pop3Agent {
             Folder folder = store.getFolder("INBOX");
             folder.open(Folder.READ_WRITE);
 
-            // Message에 DELETED flag 설정
+            // 메시지 가져오기
             Message msg = folder.getMessage(msgid);
+
+            MessageParser parser = new MessageParser(msg, userid, request);
+            parser.parse(true);
+
+            // 파일의 이름을 가져옴
+            String fileName = parser.getFileName();
+    
+            // 파일이 존재한다면
+            if(fileName != null){
+                // 파일 경로 생성
+                Path path = Paths.get("src/main/webapp", DOWNLOAD_FOLDER, userid, fileName);
+                Path absolutePath = path.toAbsolutePath();
+
+                // 파일 객체 생성
+                File file = new File(absolutePath.toString());
+
+                log.debug("삭제 파일 경로: {}", absolutePath.toString());
+
+                // 서버에 저장된 파일 삭제
+                if (file.exists()) {
+                    boolean deleted = file.delete();
+                    if (deleted) {
+                        log.debug("{}파일이 삭제되었습니다.", fileName);
+                    } else {
+                        log.error("{}파일 삭제에 실패하였습니다.", fileName);
+                    }
+                } else {
+                    log.error("{}파일이 존재하지 않습니다.", fileName);
+                }
+            }
+
+            // Message에 DELETED flag 설정
             msg.setFlag(Flags.Flag.DELETED, really_delete);
 
             // 폴더에서 메시지 삭제
