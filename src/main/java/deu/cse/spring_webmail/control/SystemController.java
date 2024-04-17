@@ -14,6 +14,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.imageio.ImageIO;
+
+import deu.cse.spring_webmail.security.MyUserDetailsService;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
@@ -24,6 +26,10 @@ import org.apache.catalina.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -57,6 +63,8 @@ public class SystemController {
     private Integer JAMES_CONTROL_PORT;
     @Value("${james.host}")
     private String JAMES_HOST;
+    @Autowired
+    private MyUserDetailsService myUserDetailsService;
 
     @GetMapping("/")
     public String index() {
@@ -64,7 +72,12 @@ public class SystemController {
         session.setAttribute("host", JAMES_HOST);
         session.setAttribute("debug", "false");
 
-        return "/index";
+        return "index";
+    }
+
+    @GetMapping("/test")
+    public String test() {
+        return "test";
     }
 
     @GetMapping("/change_password")
@@ -193,8 +206,10 @@ public class SystemController {
         switch (menu) {
             case CommandType.LOGIN:
                 String host = (String) request.getSession().getAttribute("host");
-                String userid = request.getParameter("userid");
-                String password = request.getParameter("passwd");
+//                String userid = request.getParameter("userid");
+//                String password = request.getParameter("passwd");
+                String userid = (String) session.getAttribute("userid");
+                String password = (String) session.getAttribute("passwd");
 
                 // Check the login information is valid using <<model>>Pop3Agent.
                 Pop3Agent pop3Agent = new Pop3Agent(host, userid, password);
@@ -228,6 +243,8 @@ public class SystemController {
             default:
                 break;
         }
+
+        log.debug("{}\n\n", url );
         return url;
     }
 
@@ -248,6 +265,7 @@ public class SystemController {
 
     @GetMapping("/main_menu")
     public String mainMenu(Model model) {
+        log.debug("mainMenu() called...");
         Pop3Agent pop3 = new Pop3Agent();
         pop3.setHost((String) session.getAttribute("host"));
         pop3.setUserid((String) session.getAttribute("userid"));
