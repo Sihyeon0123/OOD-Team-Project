@@ -15,21 +15,15 @@ import java.util.List;
 import java.util.Map;
 import javax.imageio.ImageIO;
 
+import deu.cse.spring_webmail.model.UserService;
 import deu.cse.spring_webmail.security.MyUserDetailsService;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
-import lombok.Getter;
-import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.catalina.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -52,6 +46,8 @@ public class SystemController {
     private HttpSession session;
     @Autowired
     private HttpServletRequest request;
+    @Autowired
+    private UserService userService;
 
     @Value("${root.id}")
     private String ROOT_ID;
@@ -82,7 +78,7 @@ public class SystemController {
 
     @GetMapping("/change_password")
     public String changePassword() {
-        return "change_password"; // withdrawal.jsp로 이동
+        return "change_password"; // change_password.jsp로 이동
     }
 
     @PostMapping("/change_password.do")
@@ -100,8 +96,10 @@ public class SystemController {
                     ROOT_ID, ROOT_PASSWORD, ADMINISTRATOR);
             result = agent.changePassword(userid, currentPassword, sessionPassword, newPassword, newPasswordConfirm);
         } catch (Exception ex) {
-            log.error("withdrawal.do : 예외 = {}", ex);
+            log.error("change_password.do : 예외 = {}", ex);
         }
+
+        userService.changePassword(userid, currentPassword, newPassword);
 
         if(result){
             attrs.addFlashAttribute("msg", String.format("사용자(%s) 비밀번호 변경에 성공하였습니다.", userid));
@@ -121,10 +119,11 @@ public class SystemController {
     @PostMapping("/withdrawal.do")
     public String withdrawalDo(RedirectAttributes attrs) {
         String userid = (String)session.getAttribute("userid");
-        String userSecret = (String)session.getAttribute("password");
-        String passwd = request.getParameter("passwd");
+        String sessionPassword = (String)session.getAttribute("password");
+        String userPasswd = request.getParameter("passwd");
         log.debug("withdrawal.do called...");
-        if(userSecret.equals(passwd)){
+
+        if(sessionPassword.equals(userPasswd)){
             log.debug("({})withdrawal.do succeeded.", userid);
             try {
                 String cwd = ctx.getRealPath(".");
@@ -134,6 +133,10 @@ public class SystemController {
             } catch (Exception ex) {
                 log.error("withdrawal.do : 예외 = {}", ex);
             }
+
+            // 스프링 시큐리티 계정 삭제
+            userService.deleteUser(userid, userPasswd);
+
             attrs.addFlashAttribute("msg", String.format("사용자(%s) 회원 탈퇴 성공하였습니다.", userid));
             session.invalidate();
             return "redirect:/";
@@ -151,10 +154,12 @@ public class SystemController {
         return "signup"; // signup.jsp로 이동
     }
 
-    /**ID의 중복확인 메서드*/
+    /**ID의 중복확인 AJAX 처리 메서드*/
     @PostMapping("/isUserIDDuplicate")
     @ResponseBody
     public Map<String, Boolean> isUserIDDuplicate(@RequestBody Map<String, String> request){
+        Map<String, Boolean> result = new HashMap<>();
+
         String userid = request.get("userid");
         String cwd = ctx.getRealPath(".");
         boolean isDuplicate;
@@ -162,7 +167,6 @@ public class SystemController {
         UserAdminAgent agent = new UserAdminAgent(JAMES_HOST, JAMES_CONTROL_PORT, cwd,
                                                   ROOT_ID, ROOT_PASSWORD, ADMINISTRATOR);
         isDuplicate = agent.isUserIDDuplicate(userid);
-        Map<String, Boolean> result = new HashMap<>();
         result.put("duplicate", isDuplicate);
         return result;
     }
@@ -177,14 +181,15 @@ public class SystemController {
 
         // 비밀번호 확인
         if(passwd.equals(repasswd) && !passwd.isEmpty()){
-            attrs.addFlashAttribute("msg", String.format("회원가입에 성공하였습니다."));
+            attrs.addFlashAttribute("msg", "회원가입에 성공하였습니다.");
             // 중복 제거 가능성
             try {
                 String cwd = ctx.getRealPath(".");
                 UserAdminAgent agent = new UserAdminAgent(JAMES_HOST, JAMES_CONTROL_PORT, cwd,
                         ROOT_ID, ROOT_PASSWORD, ADMINISTRATOR);
-
+                // 메일서버 계정 추가
                 if (agent.addUser(userid, passwd)) {
+                    userService.addUser(userid, passwd);
                     attrs.addFlashAttribute("msg", String.format("사용자(%s) 추가를 성공하였습니다.", userid));
                 } else {
                     attrs.addFlashAttribute("msg", String.format("사용자(%s) 추가를 실패하였습니다.", userid));
@@ -192,9 +197,10 @@ public class SystemController {
             } catch (Exception ex) {
                 log.error("signup.do: 시스템 접속에 실패했습니다. 예외 = {}", ex.getMessage());
             }
+
             return "redirect:/";
         }else{
-            attrs.addFlashAttribute("msg", String.format("비밀번호가 일치하지 않습니다."));
+            attrs.addFlashAttribute("msg", "비밀번호가 일치하지 않습니다.");
             return "redirect:/signup";
         }
     }
@@ -243,8 +249,6 @@ public class SystemController {
             default:
                 break;
         }
-
-        log.debug("{}\n\n", url );
         return url;
     }
 
@@ -304,6 +308,7 @@ public class SystemController {
             // if (addUser successful)  사용자 등록 성공 팦업창
             // else 사용자 등록 실패 팝업창
             if (agent.addUser(id, password)) {
+                userService.addUser(id, password);
                 attrs.addFlashAttribute("msg", String.format("사용자(%s) 추가를 성공하였습니다.", id));
             } else {
                 attrs.addFlashAttribute("msg", String.format("사용자(%s) 추가를 실패하였습니다.", id));
@@ -337,6 +342,7 @@ public class SystemController {
             UserAdminAgent agent = new UserAdminAgent(JAMES_HOST, JAMES_CONTROL_PORT, cwd,
                     ROOT_ID, ROOT_PASSWORD, ADMINISTRATOR);
             agent.deleteUsers(selectedUsers);  // 수정!!!
+            userService.deleteUsers(selectedUsers);
         } catch (Exception ex) {
             log.error("delete_user.do : 예외 = {}", ex);
         }
@@ -392,6 +398,7 @@ public class SystemController {
             imageInByte = byteArrayOutputStream.toByteArray();
             byteArrayOutputStream.close();
             return imageInByte;
+
         } catch (FileNotFoundException e) {
             log.error("getImageBytes 예외: {}", e.getMessage());
         } catch (Exception e) {

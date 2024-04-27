@@ -46,32 +46,14 @@ public class SpringSecurityConfig {
 
     @Bean
     public MyUserDetailsService myUserDetailsService(DataSource dataSource) {
-//        UserDetails user1 = User.withUsername("admin")
-//                .password(passwordEncoder().encode("admin"))
-//                .roles("ADMIN")
-//                .build();
-//        UserDetails user2 = User.withUsername("user")
-//                .password(passwordEncoder().encode("user"))
-//                .roles("USERS")
-//                .build();
-
-//        log.info("user1 = {} \n user2 = {}", user1, user2);
-//        InMemoryUserDetailsManager inMemoryManager = new InMemoryUserDetailsManager(user1, user2);
-//
         JdbcUserDetailsManager jdbcManager = new JdbcUserDetailsManager(dataSource);
-        if(!jdbcManager.userExists("tester")) {
-            UserDetails user1 = User.builder()
-                    .username("tester")
-                    .password(passwordEncoder().encode("tester"))
-                    .roles("USER")
-                    .build();
-            UserDetails user2 = User.builder()
+        if(!jdbcManager.userExists("admin")) {
+            UserDetails user = User.builder()
                     .username("admin")
                     .password(passwordEncoder().encode("admin"))
                     .roles("ADMIN")
                     .build();
-            jdbcManager.createUser(user1);
-            jdbcManager.createUser(user2);
+            jdbcManager.createUser(user);
         }
 
         return new MyUserDetailsService(jdbcManager);
@@ -150,7 +132,7 @@ public class SpringSecurityConfig {
                 }
             }
 
-            log.debug("Login success URL {}\n\n\n\n\n\n", loginURL);
+            log.debug("Login success URL {}", loginURL);
             response.sendRedirect(loginURL);
         }
     }

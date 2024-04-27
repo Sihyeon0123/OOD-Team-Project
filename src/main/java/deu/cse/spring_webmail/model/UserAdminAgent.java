@@ -66,7 +66,9 @@ public class UserAdminAgent {
         // 아이디 중복 확인
         if (users.contains(userid) || userid.equals("admin")) {
             return true;
-        } else{
+        } else if(userid.isEmpty()){
+            return true;
+        }else{
             return false;
         }
     }
