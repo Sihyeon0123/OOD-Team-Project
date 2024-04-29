@@ -254,6 +254,8 @@ public class SystemController {
 
     @GetMapping("/login_fail")
     public String loginFail() {
+
+        log.debug("로그인 실패 {} ", request.getParameter("userid"));
         return "login_fail";
     }
 

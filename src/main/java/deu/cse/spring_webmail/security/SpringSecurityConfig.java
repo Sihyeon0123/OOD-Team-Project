@@ -16,6 +16,7 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -26,11 +27,14 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.provisioning.JdbcUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.stereotype.Service;
 
 import javax.sql.DataSource;
 import java.io.IOException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 
 @Configuration
@@ -88,7 +92,8 @@ public class SpringSecurityConfig {
                 .usernameParameter("userid")
                 .passwordParameter("passwd")
                 .successHandler(new MySimpleUrlAuthenticationSuccessHandler(httpSession))
-                .failureUrl("/login_fail")
+//                .failureUrl("/login_fail")
+                .failureHandler(new CustomAuthenticationFailureHandler(httpSession))
         );
 
         http.httpBasic(Customizer.withDefaults());
@@ -100,6 +105,17 @@ public class SpringSecurityConfig {
         );
 
         return http.build();
+    }
+
+    public static class CustomAuthenticationFailureHandler implements AuthenticationFailureHandler {
+        private HttpSession httpSession;
+        public CustomAuthenticationFailureHandler(HttpSession httpSession) { this.httpSession=httpSession; }
+        @Override
+        public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response, AuthenticationException exception) throws IOException, ServletException {
+            String username = URLEncoder.encode(request.getParameter("userid"), StandardCharsets.UTF_8);
+            String loginFailURL = "/webmail/login_fail?userid=" + username;
+            response.sendRedirect(loginFailURL);
+        }
     }
 
     private static class MySimpleUrlAuthenticationSuccessHandler implements AuthenticationSuccessHandler {
