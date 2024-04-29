@@ -13,6 +13,8 @@ import jakarta.mail.Part;
 import jakarta.mail.internet.MimeUtility;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
+
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.Getter;
 import lombok.NonNull;
@@ -45,7 +47,10 @@ public class MessageParser {
         downloadTempDir = request.getServletContext().getRealPath(downloadPath);
         File f = new File(downloadTempDir);
         if (!f.exists()) {
-            f.mkdir();
+            boolean isCreated = f.mkdir();
+            if (!isCreated) {
+                log.error("디렉토리 생성에 실패하였습니다.");
+            }
         }
     }
 
@@ -97,7 +102,11 @@ public class MessageParser {
                 String tempUserDir = this.downloadTempDir + File.separator + this.userid;
                 File dir = new File(tempUserDir);
                 if (!dir.exists()) {  // tempUserDir 생성
-                    dir.mkdir();
+                    boolean isCreated = dir.mkdir();
+                    if (!isCreated) {
+                        log.error("디렉토리 생성에 실패하였습니다.");
+                        throw new IOException("디렉토리 생성에 실패하였습니다.");  // 실패 시 예외 발생
+                    }
                 }
 
                 String filename = MimeUtility.decodeText(p.getFileName());

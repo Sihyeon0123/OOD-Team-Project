@@ -11,7 +11,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.core.io.ClassPathResource;
 
-@ComponentScan
+//@ComponentScan // 어노테이션을 사용하지 않아 주석처리
 @SpringBootApplication
 @Slf4j
 public class SpringWebmailApplication {
@@ -29,12 +29,14 @@ public class SpringWebmailApplication {
         log.debug("systemProperties() called...");
         PropertiesFactoryBean bean = new PropertiesFactoryBean();
         bean.setLocation(new ClassPathResource("/system.properties"));
-        try {
-            Properties props = bean.getObject();
-            // log.debug("props = {}", props.keySet());
-        } catch (IOException ex) {
-            log.error("configProperties: 예외 = {}", ex.getMessage());
-        }
+        
+// 사용하지 않는 코드 주석처리
+//        try {
+//            Properties props = bean.getObject();
+//             log.debug("props = {}", props.keySet());
+//        } catch (IOException ex) {
+//            log.error("configProperties: 예외 = {}", ex.getMessage());
+//        }
         
         return bean;
     }

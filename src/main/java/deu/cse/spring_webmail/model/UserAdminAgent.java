@@ -319,7 +319,7 @@ public class UserAdminAgent {
         // 1: Login Id message 수신
         try {
             is.read(messageBuffer);
-            recvMessage = new String(messageBuffer);
+//            recvMessage = new String(messageBuffer); // 현재 사용하지 않아서 주석처리 수행
 
             // 2: rootId 송신
             sendMessage = ROOT_ID + EOL;
