@@ -32,9 +32,6 @@ public class UserAdminAgent {
     private final String EOL = "\r\n";
     private String cwd;
 
-    public UserAdminAgent() {
-    }
-
     public UserAdminAgent(String server, int port, String cwd,
             String root_id, String root_pass, String admin_id) {
         log.debug("UserAdminAgent created: server = " + server + ", port = " + port);
@@ -254,7 +251,6 @@ public class UserAdminAgent {
         if (!isConnected) {
             return status;
         }
-
         try {
             for (String userId : userList) {
                 // 1: "deluser" 명령 송신
@@ -280,6 +276,42 @@ public class UserAdminAgent {
             return status;
         }
     }  // deleteUsers()
+
+    /** userid 의 비밀번호를 1234로 초기화 */
+    public boolean resetPassword(String[] userid) {
+        byte[] messageBuffer = new byte[1024];
+        boolean status = false;
+        String command;
+        String recvMessage;
+
+        if (!isConnected) {
+            return status;
+        }
+
+        try {
+            for(String user : userid) {
+                command = "setpassword " + user + " 1234" + EOL;
+                os.write(command.getBytes());
+                log.debug(command);
+
+                // 2: 응답 메시지 수신
+                java.util.Arrays.fill(messageBuffer, (byte) 0);
+                is.read(messageBuffer);
+
+                // 3: 응답 메시지 분석
+                recvMessage = new String(messageBuffer);
+                log.debug("recvMessage = {}", recvMessage);
+                if (recvMessage.contains("reset")) {
+                    status = true;
+                }
+            }
+            quit();
+        } catch (Exception ex) {
+            log.error("deleteUsers(): 예외 = {}", ex.getMessage());
+        } finally {
+            return status;
+        }
+    }
 
     public boolean verify(String userid) {
         boolean status = false;

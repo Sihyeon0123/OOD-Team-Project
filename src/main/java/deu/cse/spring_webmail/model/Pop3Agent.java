@@ -66,6 +66,66 @@ public class Pop3Agent {
         }
     }
 
+    /** 계정 삭제시 해당 계정의 메일함을 비운다 */
+    public boolean deleteUserMessage(String userid, HttpServletRequest request, String DOWNLOAD_FOLDER) {
+        boolean status = false;
+        if (!connectToStore()) {
+            return status;
+        }
+        try {
+            // Folder 설정
+//            Folder folder = store.getDefaultFolder();
+            Folder folder = store.getFolder("INBOX");
+            folder.open(Folder.READ_WRITE);
+
+            // 메시지 가져오기
+            Message[] msgs = folder.getMessages();
+
+            for(Message msg : msgs) {
+                MessageParser parser = new MessageParser(msg, userid, request);
+                parser.parse(true);
+
+                // 파일의 이름을 가져옴
+                String fileName = parser.getFileName();
+
+                // 파일이 존재한다면
+                if(fileName != null){
+                    // 파일 경로 생성
+                    Path path = Paths.get("src/main/webapp", DOWNLOAD_FOLDER, userid, fileName);
+                    Path absolutePath = path.toAbsolutePath();
+
+                    // 파일 객체 생성
+                    File file = new File(absolutePath.toString());
+
+                    log.debug("삭제 파일 경로: {}", absolutePath.toString());
+
+                    // 서버에 저장된 파일 삭제
+                    if (file.exists()) {
+                        boolean deleted = file.delete();
+                        if (deleted) {
+                            log.debug("{}파일이 삭제되었습니다.", fileName);
+                        } else {
+                            log.error("{}파일 삭제에 실패하였습니다.", fileName);
+                        }
+                    } else {
+                        log.error("{}파일이 존재하지 않습니다.", fileName);
+                    }
+                }
+
+                // Message에 DELETED flag 설정
+                msg.setFlag(Flags.Flag.DELETED, true);
+            }
+
+            folder.close(true);  // expunge == true
+            store.close();
+            status = true;
+        } catch (Exception ex) {
+            log.error("deleteMessage() error: {}", ex.getMessage());
+        } finally {
+            return status;
+        }
+    }
+
     public boolean deleteMessage(int msgid, boolean really_delete, String userid, HttpServletRequest request, String DOWNLOAD_FOLDER) {
         boolean status = false;
 

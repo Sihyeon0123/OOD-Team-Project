@@ -52,6 +52,8 @@ public class SystemController {
     private HttpServletRequest request;
     @Autowired
     private UserService userService;
+    @Autowired
+    private MyUserDetailsService myUserDetailsService;
 
     @Value("${root.id}")
     private String ROOT_ID;
@@ -63,8 +65,8 @@ public class SystemController {
     private Integer JAMES_CONTROL_PORT;
     @Value("${james.host}")
     private String JAMES_HOST;
-    @Autowired
-    private MyUserDetailsService myUserDetailsService;
+    @Value("${file.download_folder}")
+    private String DOWNLOAD_FOLDER;
 
 
     @GetMapping("/")
@@ -127,7 +129,17 @@ public class SystemController {
         String userid = (String)session.getAttribute("userid");
         String sessionPassword = (String)session.getAttribute("password");
         String userPasswd = request.getParameter("passwd");
+        String host = (String) session.getAttribute("host");
         log.debug("withdrawal.do called...");
+
+        Pop3Agent pop3 = new Pop3Agent(host, userid, userPasswd);
+        boolean deleteSuccessful = pop3.deleteUserMessage(userid, request, DOWNLOAD_FOLDER);
+
+        if(deleteSuccessful){
+            log.debug("{}의 메일함을 삭제하였습니다.", userid);
+        }else{
+            log.error("{}의 메일함 삭제에 실패하였습니다.", userid);
+        }
 
         if(sessionPassword.equals(userPasswd)){
             log.debug("({})withdrawal.do succeeded.", userid);
@@ -328,15 +340,32 @@ public class SystemController {
      * @param attrs
      * @return
      */
-    @PostMapping("delete_user.do")
+    @PostMapping("/delete_user.do")
     public String deleteUserDo(@RequestParam String[] selectedUsers, RedirectAttributes attrs) {
+        String host = (String) session.getAttribute("host");
         log.debug("delete_user.do: selectedUser = {}", List.of(selectedUsers));
 
         try {
             String cwd = ctx.getRealPath(".");
             UserAdminAgent agent = new UserAdminAgent(JAMES_HOST, JAMES_CONTROL_PORT, cwd,
                     ROOT_ID, ROOT_PASSWORD, ADMINISTRATOR);
-            agent.deleteUsers(selectedUsers);  // 수정!!!
+
+            // 비밀번호를 초기화
+            agent.resetPassword(selectedUsers);
+            // 계정의 메일함 비우기
+            for(String user : selectedUsers) {
+                Pop3Agent pop3 = new Pop3Agent(host, user, "1234");
+                if(pop3.deleteUserMessage(user, request, DOWNLOAD_FOLDER)){
+                    log.debug("메일함 비움");
+                }else{
+                    log.debug("메일함 비우기 실패");
+                }
+            }
+            UserAdminAgent agent2 = new UserAdminAgent(JAMES_HOST, JAMES_CONTROL_PORT, cwd,
+                    ROOT_ID, ROOT_PASSWORD, ADMINISTRATOR);
+            // 이메일 서버의 계정 삭제
+            agent2.deleteUsers(selectedUsers);
+            // 스프링 시큐리티에서 계정제거
             userService.deleteUsers(selectedUsers);
         } catch (Exception ex) {
             log.error("delete_user.do : 예외 = {}", ex);
@@ -344,6 +373,7 @@ public class SystemController {
 
         return "redirect:/admin_menu";
     }
+
 
     private List<String> getUserList() {
         String cwd = ctx.getRealPath(".");
