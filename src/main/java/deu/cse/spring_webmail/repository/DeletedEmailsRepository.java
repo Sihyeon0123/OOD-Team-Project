@@ -1,11 +1,21 @@
 package deu.cse.spring_webmail.repository;
 
 import deu.cse.spring_webmail.entity.DeletedEmails;
-import org.springframework.data.repository.CrudRepository;
-import deu.cse.spring_webmail.entity.Users;
-import java.util.ArrayList;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
-public interface DeletedEmailsRepository extends CrudRepository<DeletedEmails, String> {
-    ArrayList<DeletedEmails> findByUserOrderByCreatedAtDesc(Users user);
-    void deleteByUserAndMailID(Users user, int mailID);
+import java.util.List;
+
+@Repository
+public interface DeletedEmailsRepository extends JpaRepository<DeletedEmails, Long> {
+    @Modifying
+    @Transactional
+    @Query("DELETE FROM DeletedEmails d WHERE d.user.username = :username AND d.mailID = :mailID")
+    void deleteByUserUsernameAndMailID(@Param("username") String username, @Param("mailID") int mailID);
+
+    List<DeletedEmails> findByUserUsername(String username);
 }

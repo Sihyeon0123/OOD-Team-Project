@@ -6,10 +6,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.NamedQuery;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
-
-import deu.cse.spring_webmail.entity.Users;
 
 import java.util.Date;
 
@@ -18,6 +17,7 @@ import java.util.Date;
 @Setter
 @Getter
 @Entity
+@NamedQuery(name = "DeletedEmails.findByUser", query = "SELECT d FROM DeletedEmails d WHERE d.user = :user")
 public class DeletedEmails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
