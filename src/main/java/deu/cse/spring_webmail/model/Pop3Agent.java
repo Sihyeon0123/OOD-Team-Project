@@ -4,6 +4,8 @@
  */
 package deu.cse.spring_webmail.model;
 
+import deu.cse.spring_webmail.entity.DeletedEmails;
+import deu.cse.spring_webmail.service.DeletedEmailsService;
 import jakarta.mail.FetchProfile;
 import jakarta.mail.Flags;
 import jakarta.mail.Folder;
@@ -14,6 +16,8 @@ import jakarta.mail.Store;
 import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -127,9 +131,66 @@ public class Pop3Agent {
     /*
      * 페이지 단위로 메일 목록을 보여주어야 함.
      */
-    public String getMessageList() {
+    public String getMessageList(DeletedEmailsService deletedEmailsService) {
         String result = "";
         Message[] messages = null;
+        Message[] temp = null;
+        List<Message> filteredMessages = new ArrayList<>();
+        // 휴지통에 들어있는 메일 ID를 가져온다.
+        List<DeletedEmails> deletedEmailList = deletedEmailsService.findByUsername(userid);
+
+        if (!connectToStore()) {  // 3.1
+            log.error("POP3 connection failed!");
+            return "POP3 연결이 되지 않아 메일 목록을 볼 수 없습니다.";
+        }
+        try {
+            // 메일 폴더 열기
+            Folder folder = store.getFolder("INBOX");  // 3.2
+            folder.open(Folder.READ_ONLY);  // 3.3
+
+            // 현재 수신한 메시지 모두 가져오기
+            temp = folder.getMessages();      // 3.4
+
+            for (Message msg : temp) {
+                boolean found = false;
+                for (DeletedEmails deletedEmail : deletedEmailList) {
+                    if (msg.getMessageNumber() == deletedEmail.getMailID()) {
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found) {
+                    filteredMessages.add(msg);
+                }
+            }
+            // filteredMessages를 Message[] 배열로 변환
+            messages = filteredMessages.toArray(new Message[0]);
+
+            FetchProfile fp = new FetchProfile();
+            // From, To, Cc, Bcc, ReplyTo, Subject & Date
+            fp.add(FetchProfile.Item.ENVELOPE);
+            folder.fetch(messages, fp);
+
+            MessageFormatter formatter = new MessageFormatter(userid);  //3.5
+            result = formatter.getMessageTable(messages);   // 3.6
+
+            folder.close(true);  // 3.7
+            store.close();       // 3.8
+        } catch (Exception ex) {
+            log.error("Pop3Agent.getMessageList() : exception = {}", ex.getMessage());
+            result = "Pop3Agent.getMessageList() : exception = " + ex.getMessage();
+        } finally {
+            return result;
+        }
+    }
+
+    public String getTrashList(DeletedEmailsService deletedEmailsService) {
+        String result = "";
+        // 휴지통에 들어있는 메일 ID를 가져온다.
+        List<DeletedEmails> deletedEmailList = deletedEmailsService.findByUsername(userid);
+        // 버려진 메일 개수를 가져옵니다.
+        int len = deletedEmailList.size();
+        Message[] messages = new Message[len];
 
         if (!connectToStore()) {  // 3.1
             log.error("POP3 connection failed!");
@@ -140,16 +201,19 @@ public class Pop3Agent {
             // 메일 폴더 열기
             Folder folder = store.getFolder("INBOX");  // 3.2
             folder.open(Folder.READ_ONLY);  // 3.3
+            
+            // 휴지통에 들어있는 MailID를 이용하여 버려진 메일을 가져온다.
+            for (int i = 0; i < len; i++) {
+                messages[i] = folder.getMessage(deletedEmailList.get(i).getMailID());      // 3.4
+            }
 
-            // 현재 수신한 메시지 모두 가져오기
-            messages = folder.getMessages();      // 3.4
             FetchProfile fp = new FetchProfile();
             // From, To, Cc, Bcc, ReplyTo, Subject & Date
             fp.add(FetchProfile.Item.ENVELOPE);
             folder.fetch(messages, fp);
 
             MessageFormatter formatter = new MessageFormatter(userid);  //3.5
-            result = formatter.getMessageTable(messages);   // 3.6
+            result = formatter.getTrashTable(messages);   // 3.6
 
             folder.close(true);  // 3.7
             store.close();       // 3.8

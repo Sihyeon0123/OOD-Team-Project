@@ -20,13 +20,19 @@ public class DeletedEmailsService {
     }
     
     /** 이메일을 휴지통에 저장 */
-    public void saveDeletedEmail(String username, int mailID) {
-        Users user = new Users();
-        user.setUsername(username);
-        DeletedEmails deletedEmails = new DeletedEmails();
-        deletedEmails.setUser(user);
-        deletedEmails.setMailID(mailID);
-        this.deletedEmailsRepository.save(deletedEmails);
+    public boolean saveDeletedEmail(String username, int mailID) {
+        try {
+            Users user = new Users();
+            user.setUsername(username);
+            DeletedEmails deletedEmails = new DeletedEmails();
+            deletedEmails.setUser(user);
+            deletedEmails.setMailID(mailID);
+            this.deletedEmailsRepository.save(deletedEmails);
+            return true; // 저장이 성공했을 경우 true 반환
+        } catch (Exception e) {
+            e.printStackTrace(); // 예외가 발생하면 스택 트레이스 출력
+            return false; // 저장이 실패했을 경우 false 반환
+        }
     }
 
     /** username 및 mailID를 이용하여 제거 */

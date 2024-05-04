@@ -5,6 +5,7 @@
 package deu.cse.spring_webmail.control;
 
 import deu.cse.spring_webmail.model.Pop3Agent;
+import deu.cse.spring_webmail.service.DeletedEmailsService;
 import jakarta.mail.internet.MimeUtility;
 import java.io.File;
 import java.io.IOException;
@@ -49,6 +50,8 @@ public class ReadController {
     private HttpServletRequest request;
     @Value("${file.download_folder}")
     private String DOWNLOAD_FOLDER;
+    @Autowired
+    private DeletedEmailsService deletedEmailsService;
 
     @GetMapping("/show_message")
     public String showMessage(@RequestParam Integer msgid, Model model) {
@@ -110,7 +113,20 @@ public class ReadController {
 
         return new ResponseEntity<>(resource, headers, HttpStatus.OK);
     }
-    
+
+    @GetMapping("/main_menu")
+    public String mainMenu(Model model) {
+        log.debug("mainMenu() called...");
+        Pop3Agent pop3 = new Pop3Agent();
+        pop3.setHost((String) session.getAttribute("host"));
+        pop3.setUserid((String) session.getAttribute("userid"));
+        pop3.setPassword((String) session.getAttribute("password"));
+
+        String messageList = pop3.getMessageList(this.deletedEmailsService);
+        model.addAttribute("messageList", messageList);
+        return "main_menu";
+    }
+
     @GetMapping("/delete_mail.do")
     public String deleteMailDo(@RequestParam("msgid") Integer msgId, RedirectAttributes attrs) {
         log.debug("delete_mail.do: msgid = {}", msgId);
@@ -122,11 +138,42 @@ public class ReadController {
         Pop3Agent pop3 = new Pop3Agent(host, userid, password);
         boolean deleteSuccessful = pop3.deleteMessage(msgId, true, userid, request, DOWNLOAD_FOLDER);
         if (deleteSuccessful) {
+            this.deletedEmailsService.deleteDeletedEmail(userid, msgId);
             attrs.addFlashAttribute("msg", "메시지 삭제를 성공하였습니다.");
         } else {
             attrs.addFlashAttribute("msg", "메시지 삭제를 실패하였습니다.");
         }
         
+        return "redirect:trash";
+    }
+
+    @GetMapping("/trash")
+    public String trash(Model model) {
+        log.debug("trash() called...");
+        Pop3Agent pop3 = new Pop3Agent();
+        pop3.setHost((String) session.getAttribute("host"));
+        pop3.setUserid((String) session.getAttribute("userid"));
+        pop3.setPassword((String) session.getAttribute("password"));
+
+        String messageList = pop3.getTrashList(this.deletedEmailsService);
+        model.addAttribute("messageList", messageList);
+        return "trash"; // change_password.jsp로 이동
+    }
+
+    @GetMapping("/trash.do")
+    public String trashDo(@RequestParam("msgid") int msgId, RedirectAttributes attrs) {
+        log.debug("delete_mail.do: msgid = {}", msgId);
+
+        String username = (String) session.getAttribute("userid");
+
+
+        boolean deleteSuccessful = this.deletedEmailsService.saveDeletedEmail(username, msgId);
+        if (deleteSuccessful) {
+            attrs.addFlashAttribute("msg", "메시지를 휴지통에 버렸습니다.");
+        } else {
+            attrs.addFlashAttribute("msg", "메시지를 버리지 못하였습니다.");
+        }
+
         return "redirect:main_menu";
     }
 }

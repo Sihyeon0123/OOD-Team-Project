@@ -65,8 +65,7 @@ public class SystemController {
     private String JAMES_HOST;
     @Autowired
     private MyUserDetailsService myUserDetailsService;
-    @Autowired
-    private DeletedEmailsService deletedEmailsService;
+
 
     @GetMapping("/")
     public String index() {
@@ -274,19 +273,6 @@ public class SystemController {
         }
 
         return status;
-    }
-
-    @GetMapping("/main_menu")
-    public String mainMenu(Model model) {
-        log.debug("mainMenu() called...");
-        Pop3Agent pop3 = new Pop3Agent();
-        pop3.setHost((String) session.getAttribute("host"));
-        pop3.setUserid((String) session.getAttribute("userid"));
-        pop3.setPassword((String) session.getAttribute("password"));
-
-        String messageList = pop3.getMessageList();
-        model.addAttribute("messageList", messageList);
-        return "main_menu";
     }
 
     @GetMapping("/admin_menu")
