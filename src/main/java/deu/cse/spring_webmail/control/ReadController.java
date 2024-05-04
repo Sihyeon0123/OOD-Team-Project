@@ -176,4 +176,13 @@ public class ReadController {
 
         return "redirect:main_menu";
     }
+
+    @GetMapping("/restore_mail.do")
+    public String restoreMailDo(@RequestParam("msgid") int msgId, RedirectAttributes attrs) {
+        log.debug("restore_mail.do: msgid = {}", msgId);
+        String username = (String) session.getAttribute("userid");
+        this.deletedEmailsService.deleteDeletedEmail(username, msgId);
+        attrs.addFlashAttribute("msg", "메시지를 복구하였습니다.");
+        return "redirect:trash";
+    }
 }
