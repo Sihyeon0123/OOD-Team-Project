@@ -98,6 +98,11 @@ public class SystemController {
         String newPasswordConfirm = request.getParameter("newPasswordConfirm");
         boolean result = false;
 
+        if(newPassword.length() < 8){
+            attrs.addFlashAttribute("msg", "비밀번호는 8자 이상이어야 합니다.");
+            return "redirect:change_password";
+        }
+
         try{
             String cwd = ctx.getRealPath(".");
             UserAdminAgent agent = new UserAdminAgent(JAMES_HOST, JAMES_CONTROL_PORT, cwd,
@@ -197,8 +202,14 @@ public class SystemController {
         String repasswd = request.getParameter("repasswd");
         log.debug("signUpDo() called...\n{}",attrs);
 
+
+        if(passwd.length() < 8){
+            attrs.addFlashAttribute("msg", "비밀번호는 8자 이상이어야 합니다.");
+            return "redirect:/signup";
+        }
+
         // 비밀번호 확인
-        if(passwd.equals(repasswd) && !passwd.isEmpty()){
+        if(passwd.equals(repasswd)){
             attrs.addFlashAttribute("msg", "회원가입에 성공하였습니다.");
             // 중복 제거 가능성
             try {
