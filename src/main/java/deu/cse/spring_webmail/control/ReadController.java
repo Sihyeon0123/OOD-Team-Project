@@ -48,10 +48,14 @@ public class ReadController {
     private HttpSession session;
     @Autowired
     private HttpServletRequest request;
-    @Value("${file.download_folder}")
-    private String DOWNLOAD_FOLDER;
     @Autowired
     private DeletedEmailsService deletedEmailsService;
+
+    @Value("${file.download_folder}")
+    private String DOWNLOAD_FOLDER;
+    @Value("${page.size}")
+    private int pageSize;
+
 
     @GetMapping("/show_message")
     public String showMessage(@RequestParam Integer msgid, Model model) {
@@ -115,14 +119,20 @@ public class ReadController {
     }
 
     @GetMapping("/main_menu")
-    public String mainMenu(Model model) {
+    public String mainMenu(@RequestParam(name = "page", defaultValue = "1") int page, Model model) {
         log.debug("mainMenu() called...");
         Pop3Agent pop3 = new Pop3Agent();
         pop3.setHost((String) session.getAttribute("host"));
         pop3.setUserid((String) session.getAttribute("userid"));
         pop3.setPassword((String) session.getAttribute("password"));
+        String messageList = pop3.getMessageList(this.deletedEmailsService, page, pageSize);
 
-        String messageList = pop3.getMessageList(this.deletedEmailsService);
+        // 최대 페이지수 반환
+        int maxPageNumber = (int) Math.ceil((double) pop3.getMessageCount(this.deletedEmailsService) / pageSize);
+
+        model.addAttribute("maxPageNumber", maxPageNumber);
+        // 현재 페이지
+        model.addAttribute("pageNumber", page);
         model.addAttribute("messageList", messageList);
         return "main_menu";
     }
@@ -148,14 +158,20 @@ public class ReadController {
     }
 
     @GetMapping("/trash")
-    public String trash(Model model) {
+    public String trash(@RequestParam(name = "page", defaultValue = "1") int page,Model model) {
         log.debug("trash() called...");
         Pop3Agent pop3 = new Pop3Agent();
         pop3.setHost((String) session.getAttribute("host"));
         pop3.setUserid((String) session.getAttribute("userid"));
         pop3.setPassword((String) session.getAttribute("password"));
 
-        String messageList = pop3.getTrashList(this.deletedEmailsService);
+        // 최대 페이지수 반환
+        int maxPageNumber = (int) Math.ceil((double) pop3.getDeletedMessageCount(this.deletedEmailsService) / pageSize);
+        model.addAttribute("maxPageNumber", maxPageNumber);
+
+        // 현재 페이지
+        model.addAttribute("pageNumber", page);
+        String messageList = pop3.getTrashList(this.deletedEmailsService, page, pageSize);
         model.addAttribute("messageList", messageList);
         return "trash"; // change_password.jsp로 이동
     }

@@ -27,7 +27,7 @@ public class MessageFormatter {
     @Getter private String body;
 
 
-    public String getMessageTable(Message[] messages) {
+    public String getMessageTable(Message[] messages, int page, int pageSize) {
         StringBuilder buffer = new StringBuilder();
 
         // 메시지 제목 보여주기
@@ -46,7 +46,7 @@ public class MessageFormatter {
             // 메시지 헤더 포맷
             // 추출한 정보를 출력 포맷 사용하여 스트링으로 만들기
             buffer.append("<tr> "
-                    + " <td id=no>" + (i + 1) + " </td> "
+                    + " <td id=no>" + (((page-1)*pageSize)+(i+1)) + " </td> "
                     + " <td id=sender>" + parser.getFromAddress() + "</td>"
                     + " <td id=subject> "
                     + " <a href=show_message?msgid=" + (i + 1) + " title=\"메일 보기\"> "
@@ -54,7 +54,7 @@ public class MessageFormatter {
                     + " <td id=date>" + parser.getSentDate() + "</td>"
                     + " <td id=delete>"
                     + "<a href=trash.do"
-                    + "?msgid=" + (i + 1) + "> 삭제 </a>" + "</td>"
+                    + "?msgid=" + messages[i].getMessageNumber() + "> 삭제 </a>" + "</td>"
                     + " </tr>");
         }
         buffer.append("</table>");
@@ -63,7 +63,7 @@ public class MessageFormatter {
 //        return "MessageFormatter 테이블 결과";
     }
 
-    public String getTrashTable(Message[] messages) {
+    public String getTrashTable(Message[] messages, int page, int pageSize) {
         StringBuilder buffer = new StringBuilder();
 
         // 메시지 제목 보여주기
@@ -83,7 +83,7 @@ public class MessageFormatter {
             // 메시지 헤더 포맷
             // 추출한 정보를 출력 포맷 사용하여 스트링으로 만들기
             buffer.append("<tr> "
-                    + " <td id=no>" + (i + 1) + " </td> "
+                    + " <td id=no>" + (((page-1)*pageSize)+(i+1)) + " </td> "
                     + " <td id=sender>" + parser.getFromAddress() + "</td>"
                     + " <td id=subject> "
                     + " <a href=show_message?msgid=" + (i + 1) + " title=\"메일 보기\"> "
@@ -94,7 +94,7 @@ public class MessageFormatter {
                     + "?msgid=" + messages[i].getMessageNumber() + "> 복구 </a>" + "</td>"
                     + " <td id=delete>"
                     + "<a href=delete_mail.do"
-                    + "?msgid=" + (i + 1) + "> 삭제 </a>" + "</td>"
+                    + "?msgid=" + messages[i].getMessageNumber() + "> 삭제 </a>" + "</td>"
                     + " </tr>");
         }
         buffer.append("</table>");

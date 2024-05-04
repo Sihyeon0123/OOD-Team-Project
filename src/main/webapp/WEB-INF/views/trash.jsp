@@ -43,7 +43,12 @@
         <div id="main">
             ${messageList}
         </div>
-
+        <br/>
+        <div style="text-align: center;">
+            <c:forEach var="page" begin="1" end="${maxPageNumber}" varStatus="status">
+                <a href="/webmail/trash?page=${status.index}" style="font-size: 20px; display: inline-block; text-align: center;">${status.index}</a>
+            </c:forEach>
+        </div>
         <%@include file="footer.jspf"%>
     </body>
 </html>

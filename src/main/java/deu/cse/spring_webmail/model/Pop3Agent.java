@@ -191,9 +191,80 @@ public class Pop3Agent {
     /*
      * 페이지 단위로 메일 목록을 보여주어야 함.
      */
-    public String getMessageList(DeletedEmailsService deletedEmailsService) {
+    public String getMessageList(DeletedEmailsService deletedEmailsService, int page, int pageSize) {
         String result = "";
+        Message[] filteredMessages = null;
         Message[] messages = null;
+        Message[] temp = null;
+        List<Message> filteredMessageList = new ArrayList<>();
+        List<Message> tempList = new ArrayList<>();
+        // 휴지통에 들어있는 메일 ID를 가져온다.
+        List<DeletedEmails> deletedEmailList = deletedEmailsService.findByUsername(userid);
+
+        if (!connectToStore()) {  // 3.1
+            log.error("POP3 connection failed!");
+            return "POP3 연결이 되지 않아 메일 목록을 볼 수 없습니다.";
+        }
+        try {
+            // 메일 폴더 열기
+            Folder folder = store.getFolder("INBOX");  // 3.2
+            folder.open(Folder.READ_ONLY);  // 3.3
+
+            // 현재 수신한 메시지 모두 가져오기
+            temp = folder.getMessages();      // 3.4
+            for (Message msg : temp) {
+                boolean found = false;
+                for (DeletedEmails deletedEmail : deletedEmailList) {
+                    if (msg.getMessageNumber() == deletedEmail.getMailID()) {
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found) {
+                    filteredMessageList.add(msg);
+                }
+            }
+            // filteredMessages를 Message[] 배열로 변환
+            messages = filteredMessageList.toArray(new Message[0]);
+
+            if(page*pageSize < messages.length){
+                for(int j = 0, i=(page-1)*pageSize; i<page*pageSize; i++, j++) {
+                    tempList.add(messages[i]);
+                }
+            }
+            else{
+                for(int j = 0, i=(page-1)*pageSize; i<messages.length; i++, j++) {
+                    tempList.add(messages[i]);
+                }
+            }
+            filteredMessages = tempList.toArray(new Message[0]);
+
+            FetchProfile fp = new FetchProfile();
+            // From, To, Cc, Bcc, ReplyTo, Subject & Date
+            fp.add(FetchProfile.Item.ENVELOPE);
+            folder.fetch(filteredMessages, fp);
+
+            MessageFormatter formatter = new MessageFormatter(userid);  //3.5
+            result = formatter.getMessageTable(filteredMessages, page, pageSize);   // 3.6
+
+            folder.close(true);  // 3.7
+            store.close();       // 3.8
+        } catch (Exception ex) {
+            log.error("Pop3Agent.getMessageList() : exception = {}", ex.getMessage());
+            result = "Pop3Agent.getMessageList() : exception = " + ex.getMessage();
+        } finally {
+            return result;
+        }
+    }
+
+    /** 현재 삭제 메시지 개수를 반환 */
+    public int getDeletedMessageCount(DeletedEmailsService deletedEmailsService){
+        return deletedEmailsService.findByUsername(userid).size();
+    }
+
+    /** 현재 삭제되지 않은 메시지 개수를 반환 */
+    public int getMessageCount(DeletedEmailsService deletedEmailsService) {
+        int result = 0;
         Message[] temp = null;
         List<Message> filteredMessages = new ArrayList<>();
         // 휴지통에 들어있는 메일 ID를 가져온다.
@@ -201,7 +272,6 @@ public class Pop3Agent {
 
         if (!connectToStore()) {  // 3.1
             log.error("POP3 connection failed!");
-            return "POP3 연결이 되지 않아 메일 목록을 볼 수 없습니다.";
         }
         try {
             // 메일 폴더 열기
@@ -223,34 +293,25 @@ public class Pop3Agent {
                     filteredMessages.add(msg);
                 }
             }
-            // filteredMessages를 Message[] 배열로 변환
-            messages = filteredMessages.toArray(new Message[0]);
-
-            FetchProfile fp = new FetchProfile();
-            // From, To, Cc, Bcc, ReplyTo, Subject & Date
-            fp.add(FetchProfile.Item.ENVELOPE);
-            folder.fetch(messages, fp);
-
-            MessageFormatter formatter = new MessageFormatter(userid);  //3.5
-            result = formatter.getMessageTable(messages);   // 3.6
-
+            result = filteredMessages.size();
             folder.close(true);  // 3.7
             store.close();       // 3.8
         } catch (Exception ex) {
             log.error("Pop3Agent.getMessageList() : exception = {}", ex.getMessage());
-            result = "Pop3Agent.getMessageList() : exception = " + ex.getMessage();
         } finally {
             return result;
         }
     }
 
-    public String getTrashList(DeletedEmailsService deletedEmailsService) {
+    public String getTrashList(DeletedEmailsService deletedEmailsService, int page, int pageSize) {
         String result = "";
         // 휴지통에 들어있는 메일 ID를 가져온다.
         List<DeletedEmails> deletedEmailList = deletedEmailsService.findByUsername(userid);
         // 버려진 메일 개수를 가져옵니다.
         int len = deletedEmailList.size();
         Message[] messages = new Message[len];
+        Message[] filteredMessages = null;
+        List<Message> tempList = new ArrayList<>();
 
         if (!connectToStore()) {  // 3.1
             log.error("POP3 connection failed!");
@@ -261,25 +322,31 @@ public class Pop3Agent {
             // 메일 폴더 열기
             Folder folder = store.getFolder("INBOX");  // 3.2
             folder.open(Folder.READ_ONLY);  // 3.3
-            
             // 휴지통에 들어있는 MailID를 이용하여 버려진 메일을 가져온다.
             for (int i = 0; i < len; i++) {
                 messages[i] = folder.getMessage(deletedEmailList.get(i).getMailID());      // 3.4
             }
 
+            for(int i=0; i<pageSize; i++) {
+                if(i < len){
+                    tempList.add(messages[(page-1)*pageSize+i]);
+                }else break;
+            }
+
+            filteredMessages = tempList.toArray(new Message[0]);
+
             FetchProfile fp = new FetchProfile();
-            // From, To, Cc, Bcc, ReplyTo, Subject & Date
             fp.add(FetchProfile.Item.ENVELOPE);
-            folder.fetch(messages, fp);
+            folder.fetch(filteredMessages, fp);
 
             MessageFormatter formatter = new MessageFormatter(userid);  //3.5
-            result = formatter.getTrashTable(messages);   // 3.6
+            result = formatter.getTrashTable(filteredMessages, page, pageSize);   // 3.6
 
             folder.close(true);  // 3.7
             store.close();       // 3.8
         } catch (Exception ex) {
-            log.error("Pop3Agent.getMessageList() : exception = {}", ex.getMessage());
-            result = "Pop3Agent.getMessageList() : exception = " + ex.getMessage();
+            log.error("Pop3Agent.getTrashList() : exception = {}", ex.getMessage());
+            result = "Pop3Agent.getTrashList() : exception = " + ex.getMessage();
         } finally {
             return result;
         }
