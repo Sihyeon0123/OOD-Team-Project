@@ -29,7 +29,7 @@ public class DeletedEmails {
     private Users user;
 
     @Column(nullable = false)
-    private int mailID;
+    private Date receivedDate;
 
     @CreationTimestamp
     @Temporal(TemporalType.TIMESTAMP)

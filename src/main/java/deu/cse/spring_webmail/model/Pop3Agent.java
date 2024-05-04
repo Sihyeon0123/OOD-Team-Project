@@ -17,6 +17,7 @@ import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Properties;
 
@@ -212,10 +213,11 @@ public class Pop3Agent {
 
             // 현재 수신한 메시지 모두 가져오기
             temp = folder.getMessages();      // 3.4
+
             for (Message msg : temp) {
                 boolean found = false;
                 for (DeletedEmails deletedEmail : deletedEmailList) {
-                    if (msg.getMessageNumber() == deletedEmail.getMailID()) {
+                    if (deletedEmail.getReceivedDate().compareTo(msg.getSentDate()) == 0) {
                         found = true;
                         break;
                     }
@@ -284,7 +286,7 @@ public class Pop3Agent {
             for (Message msg : temp) {
                 boolean found = false;
                 for (DeletedEmails deletedEmail : deletedEmailList) {
-                    if (msg.getMessageNumber() == deletedEmail.getMailID()) {
+                    if (msg.getSentDate() == deletedEmail.getReceivedDate()) {
                         found = true;
                         break;
                     }
@@ -311,6 +313,7 @@ public class Pop3Agent {
         int len = deletedEmailList.size();
         Message[] messages = new Message[len];
         Message[] filteredMessages = null;
+        Message[] temp = null;
         List<Message> tempList = new ArrayList<>();
 
         if (!connectToStore()) {  // 3.1
@@ -322,16 +325,28 @@ public class Pop3Agent {
             // 메일 폴더 열기
             Folder folder = store.getFolder("INBOX");  // 3.2
             folder.open(Folder.READ_ONLY);  // 3.3
-            // 휴지통에 들어있는 MailID를 이용하여 버려진 메일을 가져온다.
-            for (int i = 0; i < len; i++) {
-                messages[i] = folder.getMessage(deletedEmailList.get(i).getMailID());      // 3.4
-            }
 
-            for(int i=0; i<pageSize; i++) {
-                if(i < len){
-                    tempList.add(messages[(page-1)*pageSize+i]);
-                }else break;
+            // 모든 메일을 가져온다.
+            temp = folder.getMessages();
+
+            for (Message msg : temp) {
+                boolean found = false;
+                for (DeletedEmails deletedEmail : deletedEmailList) {
+                    if (deletedEmail.getReceivedDate().compareTo(msg.getSentDate()) == 0) {
+                        found = true;
+                        break;
+                    }
+                }
+                if (found) {
+                    tempList.add(msg);
+                }
             }
+//
+//            for(int i=0; i<pageSize; i++) {
+//                if(i < len){
+//                    tempList.add(messages[(page-1)*pageSize+i]);
+//                }else break;
+//            }
 
             filteredMessages = tempList.toArray(new Message[0]);
 
@@ -409,5 +424,26 @@ public class Pop3Agent {
             return status;
         }
     }
-    
+
+    public Date getMessageSentDate(int msgId) {
+        Date result = null;
+        if (!connectToStore()) {  // 3.1
+            log.error("POP3 connection failed!");
+        }
+        try {
+            // 메일 폴더 열기
+            Folder folder = store.getFolder("INBOX");  // 3.2
+            folder.open(Folder.READ_ONLY);  // 3.3
+
+            // 현재 수신한 메시지 모두 가져오기
+            Message msg = folder.getMessage(msgId);      // 3.4
+            result = msg.getSentDate();
+            folder.close(true);  // 3.7
+            store.close();       // 3.8
+        } catch (Exception ex) {
+            log.error("Pop3Agent.getMessageList() : exception = {}", ex.getMessage());
+        } finally {
+            return result;
+        }
+    }
 }

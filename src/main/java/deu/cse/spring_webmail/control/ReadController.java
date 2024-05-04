@@ -14,6 +14,8 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Date;
+
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
@@ -146,9 +148,11 @@ public class ReadController {
         String password = (String) session.getAttribute("password");
 
         Pop3Agent pop3 = new Pop3Agent(host, userid, password);
+        Date sentDate = pop3.getMessageSentDate(msgId);
+
         boolean deleteSuccessful = pop3.deleteMessage(msgId, true, userid, request, DOWNLOAD_FOLDER);
         if (deleteSuccessful) {
-            this.deletedEmailsService.deleteDeletedEmail(userid, msgId);
+            this.deletedEmailsService.deleteDeletedEmail(userid, sentDate);
             attrs.addFlashAttribute("msg", "메시지 삭제를 성공하였습니다.");
         } else {
             attrs.addFlashAttribute("msg", "메시지 삭제를 실패하였습니다.");
@@ -181,9 +185,14 @@ public class ReadController {
         log.debug("delete_mail.do: msgid = {}", msgId);
 
         String username = (String) session.getAttribute("userid");
+        Pop3Agent pop3 = new Pop3Agent();
+        pop3.setHost((String) session.getAttribute("host"));
+        pop3.setUserid((String) session.getAttribute("userid"));
+        pop3.setPassword((String) session.getAttribute("password"));
 
+        Date sentDate =  pop3.getMessageSentDate(msgId);
 
-        boolean deleteSuccessful = this.deletedEmailsService.saveDeletedEmail(username, msgId);
+        boolean deleteSuccessful = this.deletedEmailsService.saveDeletedEmail(username, sentDate);
         if (deleteSuccessful) {
             attrs.addFlashAttribute("msg", "메시지를 휴지통에 버렸습니다.");
         } else {
@@ -197,7 +206,15 @@ public class ReadController {
     public String restoreMailDo(@RequestParam("msgid") int msgId, RedirectAttributes attrs) {
         log.debug("restore_mail.do: msgid = {}", msgId);
         String username = (String) session.getAttribute("userid");
-        this.deletedEmailsService.deleteDeletedEmail(username, msgId);
+
+        Pop3Agent pop3 = new Pop3Agent();
+        pop3.setHost((String) session.getAttribute("host"));
+        pop3.setUserid((String) session.getAttribute("userid"));
+        pop3.setPassword((String) session.getAttribute("password"));
+
+        Date sentDate =  pop3.getMessageSentDate(msgId);
+
+        this.deletedEmailsService.deleteDeletedEmail(username, sentDate);
         attrs.addFlashAttribute("msg", "메시지를 복구하였습니다.");
         return "redirect:trash";
     }

@@ -7,6 +7,7 @@ import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.List;
 
 @Service
@@ -20,13 +21,13 @@ public class DeletedEmailsService {
     }
     
     /** 이메일을 휴지통에 저장 */
-    public boolean saveDeletedEmail(String username, int mailID) {
+    public boolean saveDeletedEmail(String username, Date receivedDate) {
         try {
             Users user = new Users();
             user.setUsername(username);
             DeletedEmails deletedEmails = new DeletedEmails();
             deletedEmails.setUser(user);
-            deletedEmails.setMailID(mailID);
+            deletedEmails.setReceivedDate(receivedDate);
             this.deletedEmailsRepository.save(deletedEmails);
             return true; // 저장이 성공했을 경우 true 반환
         } catch (Exception e) {
@@ -37,8 +38,8 @@ public class DeletedEmailsService {
 
     /** username 및 mailID를 이용하여 제거 */
     @Transactional
-    public void deleteDeletedEmail(String username, int mailID) {
-        this.deletedEmailsRepository.deleteByUserUsernameAndMailID(username, mailID);
+    public void deleteDeletedEmail(String username, Date receivedDate) {
+        this.deletedEmailsRepository.deleteByUserUsernameAndReceivedDate(username, receivedDate);
     }
 
     /** 유저 이름을 기준으로 쓰레기통의 메일 값을 들고온다 */
