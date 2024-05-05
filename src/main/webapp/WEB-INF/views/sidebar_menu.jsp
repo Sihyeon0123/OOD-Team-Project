@@ -18,6 +18,7 @@
         
         <span style="color: indigo"> <strong>사용자: <%= session.getAttribute("userid") %> </strong> </span> <br>
 
+        <p> <a href="sent_mail"> 발신 메일함 </a> </p>
         <p> <a href="main_menu"> 메일 읽기 </a> </p>
         <p> <a href="write_mail"> 메일 쓰기 </a> </p>
         <p> <a href="write_mail_me"> 내게 쓰기 </a> </p>

@@ -398,7 +398,7 @@ public class Pop3Agent {
         }
     }
     
-        public String getSendMeList() {
+      public String getSendMeList() {
         String result = "";
         Message[] messages = null;
 
