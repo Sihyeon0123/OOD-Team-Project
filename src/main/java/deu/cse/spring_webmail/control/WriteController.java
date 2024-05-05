@@ -48,6 +48,13 @@ public class WriteController {
         return "write_mail/write_mail";
     }
     
+    @GetMapping("/write_mail_me")
+    public String writeMailMe() {
+        log.debug("write_mail_me called...");
+        session.removeAttribute("sender");  // 220612 LJM - 메일 쓰기 시는 
+        return "write_mail/write_mail_me";
+    }
+    
     @PostMapping("/write_mail.do")
     public String writeMailDo(@RequestParam String to, @RequestParam String cc, 
             @RequestParam String subj, @RequestParam String body, 

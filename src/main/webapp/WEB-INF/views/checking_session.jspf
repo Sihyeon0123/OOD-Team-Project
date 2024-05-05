@@ -1,0 +1,10 @@
+<%-- any content can be specified here e.g.: --%>
+<%@ page pageEncoding="UTF-8" %>
+
+<%
+    session=request.getSession(false);
+    if(session.getAttribute("userid")==null)
+    {
+        response.sendRedirect("/webmail/");
+    }
+%> 

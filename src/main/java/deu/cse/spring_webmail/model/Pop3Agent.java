@@ -397,6 +397,37 @@ public class Pop3Agent {
             return result;
         }
     }
+    
+        public String getSendMeList() {
+        String result = "";
+        Message[] messages = null;
+
+        if (!connectToStore()) {  // 3.1
+            log.error("POP3 connection failed!");
+            return "POP3 연결이 되지 않아 메일 목록을 볼 수 없습니다.";
+        }           
+        try {
+            // 메일 폴더 열기
+            Folder folder = store.getFolder("INBOX");  // 3.2
+            folder.open(Folder.READ_ONLY);  // 3.3 
+            // 현재 수신한 메시지 모두 가져오기
+            messages = folder.getMessages();      // 3.4
+            FetchProfile fp = new FetchProfile();
+            // From, To, Cc, Bcc, ReplyTo, Subject & Date
+            fp.add(FetchProfile.Item.ENVELOPE);
+            folder.fetch(messages, fp);
+            MessageFormatter formatter = new MessageFormatter(userid);  //3.5
+            result = formatter.getSendMeTable(messages);   // 3.6
+            folder.close(true);  // 3.7
+            store.close();       // 3.8
+        } catch (Exception ex) {
+            log.error("Pop3Agent.getSendMeList() : exception = {}", ex.getMessage());
+            result = "Pop3Agent.getSendMeList() : exception = " + ex.getMessage();
+        } finally {
+            return result;
+        }
+    }
+
 
     /**POP3 프로토콜을 사용하여 이메일 서버에 연결하는 메서드입니다.
      * 호스트, 사용자 ID 및 비밀번호를 사용하여 이메일 서버에 연결하고, 연결 상태를 반환합니다.*/

@@ -19,6 +19,7 @@ import java.util.Date;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
+import java.util.ArrayList;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -161,6 +162,23 @@ public class ReadController {
         return "redirect:trash";
     }
 
+    @GetMapping("/show_send_me")
+    public String showSendMe(Model model) {
+        Pop3Agent pop3 = new Pop3Agent();
+        pop3.setHost((String) session.getAttribute("host"));
+        pop3.setUserid((String) session.getAttribute("userid"));
+        pop3.setPassword((String) session.getAttribute("password"));
+
+        String sendMeList = pop3.getSendMeList();
+        model.addAttribute("sendMeList", sendMeList);
+        log.debug("show_send_me called...");
+        return "read_mail/show_send_me";
+    }
+    
+    private ArrayList<String[]> dataSet = null;
+    private ArrayList<String> Message_info = null;
+    private ArrayList<String[]> Message_ID_info = null;
+    
     @GetMapping("/trash")
     public String trash(@RequestParam(name = "page", defaultValue = "1") int page,Model model) {
         log.debug("trash() called...");
