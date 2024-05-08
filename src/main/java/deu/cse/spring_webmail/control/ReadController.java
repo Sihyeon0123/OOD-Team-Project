@@ -163,22 +163,22 @@ public class ReadController {
     }
 
     @GetMapping("/show_send_me")
-    public String showSendMe(Model model) {
+    public String showSendMe(@RequestParam(name = "page", defaultValue = "1") int page, Model model) {
+        log.debug("show_send_me called...");
         Pop3Agent pop3 = new Pop3Agent();
         pop3.setHost((String) session.getAttribute("host"));
         pop3.setUserid((String) session.getAttribute("userid"));
         pop3.setPassword((String) session.getAttribute("password"));
 
-        String sendMeList = pop3.getSendMeList();
+        // 최대 페이지수 반환
+        int maxPageNumber = (int) Math.ceil((double) pop3.getSendMeCount() / pageSize);
+        model.addAttribute("maxPageNumber", maxPageNumber);
+        String sendMeList = pop3.getSendMeList(page, pageSize);
         model.addAttribute("sendMeList", sendMeList);
-        log.debug("show_send_me called...");
+
         return "read_mail/show_send_me";
     }
-    
-    private ArrayList<String[]> dataSet = null;
-    private ArrayList<String> Message_info = null;
-    private ArrayList<String[]> Message_ID_info = null;
-    
+
     @GetMapping("/trash")
     public String trash(@RequestParam(name = "page", defaultValue = "1") int page,Model model) {
         log.debug("trash() called...");

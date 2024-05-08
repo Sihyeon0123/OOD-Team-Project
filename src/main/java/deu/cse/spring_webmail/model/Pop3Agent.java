@@ -6,20 +6,12 @@ package deu.cse.spring_webmail.model;
 
 import deu.cse.spring_webmail.entity.DeletedEmails;
 import deu.cse.spring_webmail.service.DeletedEmailsService;
-import jakarta.mail.FetchProfile;
-import jakarta.mail.Flags;
-import jakarta.mail.Folder;
-import jakarta.mail.Message;
-import jakarta.mail.Session;
-import jakarta.mail.Store;
+import jakarta.mail.*;
 
 import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Properties;
+import java.util.*;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.Getter;
@@ -213,17 +205,17 @@ public class Pop3Agent {
 
             // 현재 수신한 메시지 모두 가져오기
             temp = folder.getMessages();      // 3.4
-
-            for (Message msg : temp) {
+            log.info("{}",temp[0].getSentDate());
+            for (int i = temp.length; --i >= 0; ) {
                 boolean found = false;
                 for (DeletedEmails deletedEmail : deletedEmailList) {
-                    if (deletedEmail.getReceivedDate().compareTo(msg.getSentDate()) == 0) {
+                    if (deletedEmail.getReceivedDate().compareTo(temp[i].getSentDate()) == 0) {
                         found = true;
                         break;
                     }
                 }
                 if (!found) {
-                    filteredMessageList.add(msg);
+                    filteredMessageList.add(temp[i]);
                 }
             }
             // filteredMessages를 Message[] 배열로 변환
@@ -268,7 +260,6 @@ public class Pop3Agent {
     public int getMessageCount(DeletedEmailsService deletedEmailsService) {
         int result = 0;
         Message[] temp = null;
-        List<Message> filteredMessages = new ArrayList<>();
         // 휴지통에 들어있는 메일 ID를 가져온다.
         List<DeletedEmails> deletedEmailList = deletedEmailsService.findByUsername(userid);
 
@@ -283,19 +274,8 @@ public class Pop3Agent {
             // 현재 수신한 메시지 모두 가져오기
             temp = folder.getMessages();      // 3.4
 
-            for (Message msg : temp) {
-                boolean found = false;
-                for (DeletedEmails deletedEmail : deletedEmailList) {
-                    if (msg.getSentDate() == deletedEmail.getReceivedDate()) {
-                        found = true;
-                        break;
-                    }
-                }
-                if (!found) {
-                    filteredMessages.add(msg);
-                }
-            }
-            result = filteredMessages.size();
+            result = temp.length - deletedEmailList.size();
+            log.info("{}", result);
             folder.close(true);  // 3.7
             store.close();       // 3.8
         } catch (Exception ex) {
@@ -329,16 +309,16 @@ public class Pop3Agent {
             // 모든 메일을 가져온다.
             temp = folder.getMessages();
 
-            for (Message msg : temp) {
+            for (int i = temp.length; --i >= 0; ) {
                 boolean found = false;
                 for (DeletedEmails deletedEmail : deletedEmailList) {
-                    if (deletedEmail.getReceivedDate().compareTo(msg.getSentDate()) == 0) {
+                    if (deletedEmail.getReceivedDate().compareTo(temp[i].getSentDate()) == 0) {
                         found = true;
                         break;
                     }
                 }
                 if (found) {
-                    tempList.add(msg);
+                    tempList.add(temp[i]);
                 }
             }
 //
@@ -398,7 +378,7 @@ public class Pop3Agent {
         }
     }
     
-      public String getSendMeList() {
+    public String getSendMeList(int page, int pageSize) {
         String result = "";
         Message[] messages = null;
 
@@ -412,12 +392,13 @@ public class Pop3Agent {
             folder.open(Folder.READ_ONLY);  // 3.3 
             // 현재 수신한 메시지 모두 가져오기
             messages = folder.getMessages();      // 3.4
+
             FetchProfile fp = new FetchProfile();
             // From, To, Cc, Bcc, ReplyTo, Subject & Date
             fp.add(FetchProfile.Item.ENVELOPE);
             folder.fetch(messages, fp);
             MessageFormatter formatter = new MessageFormatter(userid);  //3.5
-            result = formatter.getSendMeTable(messages);   // 3.6
+            result = formatter.getSendMeTable(messages, page, pageSize);   // 3.6
             folder.close(true);  // 3.7
             store.close();       // 3.8
         } catch (Exception ex) {
@@ -428,7 +409,37 @@ public class Pop3Agent {
         }
     }
 
+    /** 나에게 보낸 메세지 개수 반환 */
+    public int getSendMeCount() {
+        int result = 0;
+        Message[] temp = null;
 
+        if (!connectToStore()) {  // 3.1
+            log.error("POP3 connection failed!");
+        }
+        try {
+            // 메일 폴더 열기
+            Folder folder = store.getFolder("INBOX");  // 3.2
+            folder.open(Folder.READ_ONLY);  // 3.3
+
+            // 현재 수신한 메시지 모두 가져오기
+            temp = folder.getMessages();      // 3.4
+
+            for (Message msg : temp) {
+                String sender = msg.getFrom()[0].toString();
+                if (sender.equals(userid)) {
+                    result++;
+                }
+            }
+            folder.close(true);  // 3.7
+            store.close();       // 3.8
+        } catch (Exception ex) {
+            log.error("Pop3Agent.getMessageList() : exception = {}", ex.getMessage());
+        } finally {
+            return result;
+        }
+    }
+    
     /**POP3 프로토콜을 사용하여 이메일 서버에 연결하는 메서드입니다.
      * 호스트, 사용자 ID 및 비밀번호를 사용하여 이메일 서버에 연결하고, 연결 상태를 반환합니다.*/
     private boolean connectToStore() {

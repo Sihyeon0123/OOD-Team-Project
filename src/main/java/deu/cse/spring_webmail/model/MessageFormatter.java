@@ -26,6 +26,9 @@ public class MessageFormatter {
     @Getter private String subject;
     @Getter private String body;
 
+    public void setRequest(HttpServletRequest request) {
+        this.request = request;
+    }
 
     public String getMessageTable(Message[] messages, int page, int pageSize) {
         StringBuilder buffer = new StringBuilder();
@@ -40,13 +43,14 @@ public class MessageFormatter {
                 + " <th> 삭제 </td>   "
                 + " </tr>");
 
-        for (int i = messages.length - 1; i >= 0; i--) {
+//        for (int i = messages.length - 1, no=1; i >= 0; i--, no++) {
+        for(int i=0; i<messages.length; i++) {
             MessageParser parser = new MessageParser(messages[i], userid);
             parser.parse(false);  // envelope 정보만 필요
             // 메시지 헤더 포맷
             // 추출한 정보를 출력 포맷 사용하여 스트링으로 만들기
             buffer.append("<tr> "
-                    + " <td id=no>" + (((page-1)*pageSize)+(i+1)) + " </td> "
+                    + " <td id=no>" + (((page-1)*pageSize)+i+1) + " </td> "
                     + " <td id=sender>" + parser.getFromAddress() + "</td>"
                     + " <td id=subject> "
                     + " <a href=show_message?msgid=" + (i + 1) + " title=\"메일 보기\"> "
@@ -77,13 +81,13 @@ public class MessageFormatter {
                 + " <th> 삭제 </td>   "
                 + " </tr>");
 
-        for (int i = messages.length - 1; i >= 0; i--) {
+        for(int i=0; i<messages.length; i++) {
             MessageParser parser = new MessageParser(messages[i], userid);
             parser.parse(false);  // envelope 정보만 필요
             // 메시지 헤더 포맷
             // 추출한 정보를 출력 포맷 사용하여 스트링으로 만들기
             buffer.append("<tr> "
-                    + " <td id=no>" + (((page-1)*pageSize)+(i+1)) + " </td> "
+                    + " <td id=no>" + (((page-1)*pageSize)+i+1) + " </td> "
                     + " <td id=sender>" + parser.getFromAddress() + "</td>"
                     + " <td id=subject> "
                     + " <a href=show_message?msgid=" + (i + 1) + " title=\"메일 보기\"> "
@@ -132,11 +136,8 @@ public class MessageFormatter {
 
         return buffer.toString();
     }
-    
-    public void setRequest(HttpServletRequest request) {
-        this.request = request;
-    }    
-    public String getSendMeTable(Message[] messages) {
+
+    public String getSendMeTable(Message[] messages, int page, int pageSize) {
         StringBuilder buffer = new StringBuilder();
 
         buffer.append("<table>");
@@ -146,23 +147,29 @@ public class MessageFormatter {
                 + " <th> 보낸 날짜 </td>   "
                 + " <th> 삭제 </td>   "
                 + " </tr>");
-        int mail_no=0;
+        int count = 0;
         for (int i = messages.length - 1; i >= 0; i--) {
             MessageParser parser = new MessageParser(messages[i], userid);
             parser.parse(false);
 
+            // 자기 자신에게 보낸경우에만 출력
             if (parser.getFromAddress().equals(userid)) {
-                mail_no++;
-                buffer.append("<tr> "
-                        + " <td id=no>" + mail_no + " </td> "
-                        + " <td id=subject> "
-                        + " <a href=show_message?msgid=" + (i + 1) + " title=\"메일 보기\"> "
-                        + parser.getSubject() + "</a> </td>"
-                        + " <td id=date>" + parser.getSentDate() + "</td>"
-                        + " <td id=delete>"
-                        + "<a href=delete_mail.do"
-                        + "?msgid=" + (i + 1) + "> 삭제 </a>" + "</td>"
-                        + " </tr>");
+//                log.info("min: {}, max: {}, count: {}",(page-1)*pageSize,page * pageSize, count);
+                // 현재 페이지만 출력 되도록 수정
+                if((page-1)*pageSize <= count && count < page * pageSize){
+                    buffer.append("<tr> "
+                            + " <td id=no>" + (count+1) + " </td> "
+                            + " <td id=subject> "
+                            + " <a href=show_message?msgid=" + (i + 1) + " title=\"메일 보기\"> "
+                            + parser.getSubject() + "</a> </td>"
+                            + " <td id=date>" + parser.getSentDate() + "</td>"
+                            + " <td id=delete>"
+                            + "<a href=delete_mail.do"
+                            + "?msgid=" + (i + 1) + "> 삭제 </a>" + "</td>"
+                            + " </tr>");
+                }
+                count++;
+                if(count == page * pageSize) break;
             }
         }
         buffer.append("</table>");
@@ -170,7 +177,4 @@ public class MessageFormatter {
         return buffer.toString();
     }
 
-    String getSentTable(Message[] messages) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
-    }
 }

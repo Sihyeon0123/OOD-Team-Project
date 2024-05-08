@@ -38,6 +38,12 @@
 
         <div id="main">
             ${sendMeList}
+            <br/>
+            <div style="text-align: center;">
+                <c:forEach var="page" begin="1" end="${maxPageNumber}" varStatus="status">
+                    <a href="/webmail/show_send_me?page=${status.index}" style="font-size: 20px; display: inline-block; text-align: center;">${status.index}</a>
+                </c:forEach>
+            </div>
         </div>
 
         <%@include file="../footer.jspf"%>
