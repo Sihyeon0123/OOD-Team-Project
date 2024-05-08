@@ -96,11 +96,14 @@ public class UserAdminAgent {
 
             // 2: response for "adduser" command
             java.util.Arrays.fill(messageBuffer, (byte) 0);
-            //if (is.available() > 0) {
-            is.read(messageBuffer);
+            int bytesRead = is.read(messageBuffer);
+            if (bytesRead == -1) {
+                throw new IOException("End of stream reached");
+            }
+
             String recvMessage = new String(messageBuffer);
             log.debug(recvMessage);
-            //}
+
             // 3: 기존 메일사용자 여부 확인
             if (recvMessage.contains("added")) {
                 status = true;
@@ -131,10 +134,6 @@ public class UserAdminAgent {
                 os.write(command.getBytes());
                 os.flush(); // 버퍼 비우기
 
-                
-                // 읽은 바이트 수를 확인하도록 수정
-//                java.util.Arrays.fill(messageBuffer, (byte) 0);
-//                is.read(messageBuffer);
                 // 2: 명령에 대한 응답 수신
                 StringBuilder responseBuilder = new StringBuilder();
                 int bytesRead = 0;
@@ -146,7 +145,6 @@ public class UserAdminAgent {
                         break;
                     }
                 }
-
 
                 // 3: 응답 메시지 처리
                 String recvMessage = responseBuilder.toString().trim();
@@ -178,7 +176,10 @@ public class UserAdminAgent {
 
             // 2: "listusers" 명령에 대한 응답 수신
             java.util.Arrays.fill(messageBuffer, (byte) 0);
-            is.read(messageBuffer);
+            int bytesRead = is.read(messageBuffer);
+            if (bytesRead == -1) {
+                throw new IOException("End of stream reached");
+            }
 
             // 3: 응답 메시지 처리
             String recvMessage = new String(messageBuffer);
@@ -237,7 +238,10 @@ public class UserAdminAgent {
 
             // 2: 응답 메시지 수신
             java.util.Arrays.fill(messageBuffer, (byte) 0);
-            is.read(messageBuffer);
+            int bytesRead = is.read(messageBuffer);
+            if (bytesRead == -1) {
+                throw new IOException("End of stream reached");
+            }
 
             // 3: 응답 메시지 분석
             recvMessage = new String(messageBuffer);
@@ -272,7 +276,10 @@ public class UserAdminAgent {
 
                 // 2: 응답 메시지 수신
                 java.util.Arrays.fill(messageBuffer, (byte) 0);
-                is.read(messageBuffer);
+                int bytesRead = is.read(messageBuffer);
+                if (bytesRead == -1) {
+                    throw new IOException("End of stream reached");
+                }
 
                 // 3: 응답 메시지 분석
                 recvMessage = new String(messageBuffer);
@@ -308,7 +315,10 @@ public class UserAdminAgent {
 
                 // 2: 응답 메시지 수신
                 java.util.Arrays.fill(messageBuffer, (byte) 0);
-                is.read(messageBuffer);
+                int bytesRead = is.read(messageBuffer);
+                if (bytesRead == -1) {
+                    throw new IOException("End of stream reached");
+                }
 
                 // 3: 응답 메시지 분석
                 recvMessage = new String(messageBuffer);
@@ -337,7 +347,11 @@ public class UserAdminAgent {
             // read the result for verify command
             // <-- User userid exists   or
             // <-- User userid does not exist
-            is.read(messageBuffer);
+            int bytesRead = is.read(messageBuffer);
+            if (bytesRead == -1) {
+                throw new IOException("End of stream reached");
+            }
+
             String recvMessage = new String(messageBuffer);
             if (recvMessage.contains("exists")) {
                 status = true;
@@ -362,7 +376,10 @@ public class UserAdminAgent {
         // root 인증: id, passwd - default: root
         // 1: Login Id message 수신
         try {
-            is.read(messageBuffer);
+            int bytesRead = is.read(messageBuffer);
+            if (bytesRead == -1) {
+                throw new IOException("End of stream reached");
+            }
 //            recvMessage = new String(messageBuffer); // 현재 사용하지 않아서 주석처리 수행
 
             // 2: rootId 송신
@@ -371,7 +388,10 @@ public class UserAdminAgent {
 
             // 3: Password message 수신
             java.util.Arrays.fill(messageBuffer, (byte) 0);
-            is.read(messageBuffer);
+            bytesRead = is.read(messageBuffer);
+            if (bytesRead == -1) {
+                throw new IOException("End of stream reached");
+            }
             //recvMessage = new String(messageBuffer);
 
             // 4: rootPassword 송신
@@ -381,7 +401,10 @@ public class UserAdminAgent {
             // 5: welcome message 수신
             java.util.Arrays.fill(messageBuffer, (byte) 0);
             // if (is.available() > 0) {
-            is.read(messageBuffer);
+            bytesRead = is.read(messageBuffer);
+            if (bytesRead == -1) {
+                throw new IOException("End of stream reached");
+            }
             recvMessage = new String(messageBuffer);
 
             if (recvMessage.contains("Welcome")) {
@@ -407,7 +430,10 @@ public class UserAdminAgent {
             // 2: quit 명령에 대한 응답 수신
             java.util.Arrays.fill(messageBuffer, (byte) 0);
             //if (is.available() > 0) {
-            is.read(messageBuffer);
+            int bytesRead = is.read(messageBuffer);
+            if (bytesRead == -1) {
+                throw new IOException("End of stream reached");
+            }
             // 3: 메시지 분석
             String recvMessage = new String(messageBuffer);
             if (recvMessage.contains("closed")) {

@@ -219,9 +219,9 @@ public class SystemController {
                 // 메일서버 계정 추가
                 if (agent.addUser(userid, passwd)) {
                     userService.addUser(userid, passwd);
-                    attrs.addFlashAttribute("msg", String.format("사용자(%s) 추가를 성공하였습니다.", userid));
+                    attrs.addFlashAttribute("msg", String.format("사용자(%s) 회원가입에 성공하였습니다.", userid));
                 } else {
-                    attrs.addFlashAttribute("msg", String.format("사용자(%s) 추가를 실패하였습니다.", userid));
+                    attrs.addFlashAttribute("msg", String.format("사용자(%s) 회원가입에 실패하였습니다.", userid));
                 }
             } catch (Exception ex) {
                 log.error("signup.do: 시스템 접속에 실패했습니다. 예외 = {}", ex.getMessage());

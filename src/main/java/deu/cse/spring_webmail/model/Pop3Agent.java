@@ -205,7 +205,7 @@ public class Pop3Agent {
 
             // 현재 수신한 메시지 모두 가져오기
             temp = folder.getMessages();      // 3.4
-            log.info("{}",temp[0].getSentDate());
+
             for (int i = temp.length; --i >= 0; ) {
                 boolean found = false;
                 for (DeletedEmails deletedEmail : deletedEmailList) {
