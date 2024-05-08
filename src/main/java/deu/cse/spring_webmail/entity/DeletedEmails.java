@@ -35,4 +35,13 @@ public class DeletedEmails {
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "created_at", nullable = false, updatable = false)
     private Date createdAt;
+    
+    /** 원본 수정 방지를 위한 객체 복사 반환 */
+    public Date getCreatedAt() {
+        return new Date(createdAt.getTime());
+    }
+
+    public Date getReceivedDate() {
+        return new Date(receivedDate.getTime());
+    }
 }

@@ -7,6 +7,7 @@ package deu.cse.spring_webmail;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.nio.charset.StandardCharsets;
 import java.util.Properties;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -26,7 +27,7 @@ public class PropertyReader {
 
 	public PropertyReader(String propertyFile) {
 		try (Reader reader = new InputStreamReader(
-                        this.getClass().getResourceAsStream(propertyFile))) {
+                        this.getClass().getResourceAsStream(propertyFile), StandardCharsets.UTF_8)) {
 			props.load(reader);
 			log.debug("props = {}", props);
 		} catch (IOException e) {

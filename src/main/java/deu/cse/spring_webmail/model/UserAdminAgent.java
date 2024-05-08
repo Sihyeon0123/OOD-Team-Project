@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.nio.charset.StandardCharsets;
 import java.util.LinkedList;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
@@ -92,7 +93,7 @@ public class UserAdminAgent {
         try {
             // 1: "adduser" command
             String addUserCommand = "adduser " + userId + " " + password + EOL;
-            os.write(addUserCommand.getBytes());
+            os.write(addUserCommand.getBytes(StandardCharsets.UTF_8));
 
             // 2: response for "adduser" command
             java.util.Arrays.fill(messageBuffer, (byte) 0);
@@ -101,7 +102,7 @@ public class UserAdminAgent {
                 throw new IOException("End of stream reached");
             }
 
-            String recvMessage = new String(messageBuffer);
+            String recvMessage = new String(messageBuffer, StandardCharsets.UTF_8);
             log.debug(recvMessage);
 
             // 3: 기존 메일사용자 여부 확인
@@ -131,14 +132,14 @@ public class UserAdminAgent {
             try {
                 // 1: 명령 송신
                 String command = "setpassword " + userid + " " + newPassword + EOL;
-                os.write(command.getBytes());
+                os.write(command.getBytes(StandardCharsets.UTF_8));
                 os.flush(); // 버퍼 비우기
 
                 // 2: 명령에 대한 응답 수신
                 StringBuilder responseBuilder = new StringBuilder();
                 int bytesRead = 0;
                 while ((bytesRead = is.read(messageBuffer)) != -1) {
-                    String receivedData = new String(messageBuffer, 0, bytesRead);
+                    String receivedData = new String(messageBuffer, 0, bytesRead, StandardCharsets.UTF_8);
                     responseBuilder.append(receivedData);
                     if (receivedData.contains("\n")) {
                         // 읽은 데이터에 개행 문자가 포함되어 있다면 읽기를 중단합니다.
@@ -172,7 +173,7 @@ public class UserAdminAgent {
         try {
             // 1: "listusers" 명령 송신
             String command = "listusers " + EOL;
-            os.write(command.getBytes());
+            os.write(command.getBytes(StandardCharsets.UTF_8));
 
             // 2: "listusers" 명령에 대한 응답 수신
             java.util.Arrays.fill(messageBuffer, (byte) 0);
@@ -182,7 +183,7 @@ public class UserAdminAgent {
             }
 
             // 3: 응답 메시지 처리
-            String recvMessage = new String(messageBuffer);
+            String recvMessage = new String(messageBuffer, StandardCharsets.UTF_8);
             log.debug("recvMessage = {}", recvMessage);
             userList = parseUserList(recvMessage);
 
@@ -233,7 +234,7 @@ public class UserAdminAgent {
         try {
 
             command = "deluser " + userid + EOL;
-            os.write(command.getBytes());
+            os.write(command.getBytes(StandardCharsets.UTF_8));
             log.debug(command);
 
             // 2: 응답 메시지 수신
@@ -244,7 +245,7 @@ public class UserAdminAgent {
             }
 
             // 3: 응답 메시지 분석
-            recvMessage = new String(messageBuffer);
+            recvMessage = new String(messageBuffer, StandardCharsets.UTF_8);
             log.debug("recvMessage = {}", recvMessage);
             if (recvMessage.contains("deleted")) {
                 status = true;
@@ -271,7 +272,7 @@ public class UserAdminAgent {
             for (String userId : userList) {
                 // 1: "deluser" 명령 송신
                 command = "deluser " + userId + EOL;
-                os.write(command.getBytes());
+                os.write(command.getBytes(StandardCharsets.UTF_8));
                 log.debug(command);
 
                 // 2: 응답 메시지 수신
@@ -282,7 +283,7 @@ public class UserAdminAgent {
                 }
 
                 // 3: 응답 메시지 분석
-                recvMessage = new String(messageBuffer);
+                recvMessage = new String(messageBuffer, StandardCharsets.UTF_8);
                 log.debug("recvMessage = {}", recvMessage);
                 if (recvMessage.contains("deleted")) {
                     status = true;
@@ -310,7 +311,7 @@ public class UserAdminAgent {
         try {
             for(String user : userid) {
                 command = "setpassword " + user + " 1234" + EOL;
-                os.write(command.getBytes());
+                os.write(command.getBytes(StandardCharsets.UTF_8));
                 log.debug(command);
 
                 // 2: 응답 메시지 수신
@@ -321,7 +322,7 @@ public class UserAdminAgent {
                 }
 
                 // 3: 응답 메시지 분석
-                recvMessage = new String(messageBuffer);
+                recvMessage = new String(messageBuffer, StandardCharsets.UTF_8);
                 log.debug("recvMessage = {}", recvMessage);
                 if (recvMessage.contains("reset")) {
                     status = true;
@@ -342,7 +343,7 @@ public class UserAdminAgent {
         try {
             // --> verify userid
             String verifyCommand = "verify " + userid;
-            os.write(verifyCommand.getBytes());
+            os.write(verifyCommand.getBytes(StandardCharsets.UTF_8));
 
             // read the result for verify command
             // <-- User userid exists   or
@@ -352,7 +353,7 @@ public class UserAdminAgent {
                 throw new IOException("End of stream reached");
             }
 
-            String recvMessage = new String(messageBuffer);
+            String recvMessage = new String(messageBuffer, StandardCharsets.UTF_8);
             if (recvMessage.contains("exists")) {
                 status = true;
             }
@@ -384,7 +385,7 @@ public class UserAdminAgent {
 
             // 2: rootId 송신
             sendMessage = ROOT_ID + EOL;
-            os.write(sendMessage.getBytes());
+            os.write(sendMessage.getBytes(StandardCharsets.UTF_8));
 
             // 3: Password message 수신
             java.util.Arrays.fill(messageBuffer, (byte) 0);
@@ -396,7 +397,7 @@ public class UserAdminAgent {
 
             // 4: rootPassword 송신
             sendMessage = ROOT_PASSWORD + EOL;
-            os.write(sendMessage.getBytes());
+            os.write(sendMessage.getBytes(StandardCharsets.UTF_8));
 
             // 5: welcome message 수신
             java.util.Arrays.fill(messageBuffer, (byte) 0);
@@ -405,7 +406,7 @@ public class UserAdminAgent {
             if (bytesRead == -1) {
                 throw new IOException("End of stream reached");
             }
-            recvMessage = new String(messageBuffer);
+            recvMessage = new String(messageBuffer, StandardCharsets.UTF_8);
 
             if (recvMessage.contains("Welcome")) {
                 returnVal = true;
@@ -426,7 +427,7 @@ public class UserAdminAgent {
         try {
             // 1: quit 명령 송신
             String quitCommand = "quit" + EOL;
-            os.write(quitCommand.getBytes());
+            os.write(quitCommand.getBytes(StandardCharsets.UTF_8));
             // 2: quit 명령에 대한 응답 수신
             java.util.Arrays.fill(messageBuffer, (byte) 0);
             //if (is.available() > 0) {
@@ -435,7 +436,7 @@ public class UserAdminAgent {
                 throw new IOException("End of stream reached");
             }
             // 3: 메시지 분석
-            String recvMessage = new String(messageBuffer);
+            String recvMessage = new String(messageBuffer, StandardCharsets.UTF_8);
             if (recvMessage.contains("closed")) {
                 status = true;
             } else {
