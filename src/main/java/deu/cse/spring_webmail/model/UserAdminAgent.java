@@ -129,21 +129,33 @@ public class UserAdminAgent {
                 // 1: 명령 송신
                 String command = "setpassword " + userid + " " + newPassword + EOL;
                 os.write(command.getBytes());
+                os.flush(); // 버퍼 비우기
 
+                
+                // 읽은 바이트 수를 확인하도록 수정
+//                java.util.Arrays.fill(messageBuffer, (byte) 0);
+//                is.read(messageBuffer);
                 // 2: 명령에 대한 응답 수신
-                java.util.Arrays.fill(messageBuffer, (byte) 0);
-                is.read(messageBuffer);
+                StringBuilder responseBuilder = new StringBuilder();
+                int bytesRead = 0;
+                while ((bytesRead = is.read(messageBuffer)) != -1) {
+                    String receivedData = new String(messageBuffer, 0, bytesRead);
+                    responseBuilder.append(receivedData);
+                    if (receivedData.contains("\n")) {
+                        // 읽은 데이터에 개행 문자가 포함되어 있다면 읽기를 중단합니다.
+                        break;
+                    }
+                }
+
 
                 // 3: 응답 메시지 처리
-                String recvMessage = new String(messageBuffer);
+                String recvMessage = responseBuilder.toString().trim();
                 log.debug("recvMessage = {}", recvMessage);
 
                 quit();
+                result = true;
             } catch (Exception ex) {
                 log.error("getUserList(): 예외 = {}", ex.getMessage());
-            }
-            finally {
-                result = true;
             }
         }
         return result;

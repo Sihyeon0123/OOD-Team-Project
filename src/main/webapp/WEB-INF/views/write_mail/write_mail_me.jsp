@@ -27,8 +27,8 @@
                 <table>
                     <tr>
                         <td> 내게 쓰기 </td>
-                        <td> <input type="text" name="to" size="70"
-                                    value="<%= session.getAttribute("userid") %>" readonly ><input type="text" name="cc" size="5" readonly></td>
+                        <td> <input type="text" name="to" size="80"
+                                    value="<%= session.getAttribute("userid") %>" readonly > <input type="hidden" name="cc" size="5" readonly></td>
                     </tr>
                     <tr>
                         <td> 메일 제목 </td>
