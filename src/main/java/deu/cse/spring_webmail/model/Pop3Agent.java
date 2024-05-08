@@ -289,9 +289,6 @@ public class Pop3Agent {
         String result = "";
         // 휴지통에 들어있는 메일 ID를 가져온다.
         List<DeletedEmails> deletedEmailList = deletedEmailsService.findByUsername(userid);
-        // 버려진 메일 개수를 가져옵니다.
-        int len = deletedEmailList.size();
-        Message[] messages = new Message[len];
         Message[] filteredMessages = null;
         Message[] temp = null;
         List<Message> tempList = new ArrayList<>();
@@ -321,12 +318,6 @@ public class Pop3Agent {
                     tempList.add(temp[i]);
                 }
             }
-//
-//            for(int i=0; i<pageSize; i++) {
-//                if(i < len){
-//                    tempList.add(messages[(page-1)*pageSize+i]);
-//                }else break;
-//            }
 
             filteredMessages = tempList.toArray(new Message[0]);
 

@@ -190,6 +190,7 @@ public class ReadController {
         // 최대 페이지수 반환
         int maxPageNumber = (int) Math.ceil((double) pop3.getDeletedMessageCount(this.deletedEmailsService) / pageSize);
         model.addAttribute("maxPageNumber", maxPageNumber);
+        log.info("{}",maxPageNumber);
 
         // 현재 페이지
         model.addAttribute("pageNumber", page);
