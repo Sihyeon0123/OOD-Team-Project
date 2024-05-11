@@ -229,9 +229,9 @@ public class ReadController {
         pop3.setPassword((String) session.getAttribute("password"));
 
         // 최대 페이지수 반환
-        int maxPageNumber = (int) Math.ceil((double) pop3.getSendMeCount() / pageSize);
+        int maxPageNumber = (int) Math.ceil((double) pop3.getSendMeCount(deletedEmailsService) / pageSize);
         model.addAttribute("maxPageNumber", maxPageNumber);
-        String sendMeList = pop3.getSendMeList(page, pageSize);
+        String sendMeList = pop3.getSendMeList(deletedEmailsService, page, pageSize);
         model.addAttribute("sendMeList", sendMeList);
 
         return "read_mail/show_send_me";

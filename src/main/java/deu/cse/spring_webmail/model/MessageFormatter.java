@@ -96,7 +96,7 @@ public class MessageFormatter {
                         + " <td id=no>" + (i+1) + " </td> "
                         + " <td id=sender>" + parser.getFromAddress() + "</td>"
                         + " <td id=subject> "
-                        + " <a href=show_message?msgid=" + (i + 1) + " title=\"메일 보기\"> "
+                        + " <a href=show_message?msgid=" + messages[i].getMessageNumber() + " title=\"메일 보기\"> "
                         + parser.getSubject() + "</a> </td>"
                         + " <td id=date>" + parser.getSentDate() + "</td>"
                         + " <td id=delete>"

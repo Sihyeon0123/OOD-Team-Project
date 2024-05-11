@@ -369,9 +369,12 @@ public class Pop3Agent {
         }
     }
     
-    public String getSendMeList(int page, int pageSize) {
+    public String getSendMeList(DeletedEmailsService deletedEmailsService, int page, int pageSize) {
         String result = "";
         Message[] messages = null;
+        List<DeletedEmails> deletedEmailList = deletedEmailsService.findByUsername(userid);
+        List<Message> tempList = new ArrayList<>();
+        Message[] filteredMessages = null;
 
         if (!connectToStore()) {  // 3.1
             log.error("POP3 connection failed!");
@@ -384,12 +387,27 @@ public class Pop3Agent {
             // 현재 수신한 메시지 모두 가져오기
             messages = folder.getMessages();      // 3.4
 
+            for (int i = messages.length; --i >= 0; ) {
+                boolean found = false;
+                for (DeletedEmails deletedEmail : deletedEmailList) {
+                    if (deletedEmail.getReceivedDate().compareTo(messages[i].getSentDate()) != 0) {
+                        found = true;
+                        break;
+                    }
+                }
+                if (found) {
+                    tempList.add(messages[i]);
+                }
+            }
+
+            filteredMessages = tempList.toArray(new Message[0]);
+
             FetchProfile fp = new FetchProfile();
             // From, To, Cc, Bcc, ReplyTo, Subject & Date
             fp.add(FetchProfile.Item.ENVELOPE);
-            folder.fetch(messages, fp);
+            folder.fetch(filteredMessages, fp);
             MessageFormatter formatter = new MessageFormatter(userid);  //3.5
-            result = formatter.getSendMeTable(messages, page, pageSize);   // 3.6
+            result = formatter.getSendMeTable(filteredMessages, page, pageSize);   // 3.6
             folder.close(true);  // 3.7
             store.close();       // 3.8
         } catch (Exception ex) {
@@ -401,7 +419,7 @@ public class Pop3Agent {
     }
 
     /** 나에게 보낸 메세지 개수 반환 */
-    public int getSendMeCount() {
+    public int getSendMeCount(DeletedEmailsService deletedEmailsService) {
         int result = 0;
         Message[] temp = null;
 
@@ -416,10 +434,23 @@ public class Pop3Agent {
             // 현재 수신한 메시지 모두 가져오기
             temp = folder.getMessages();      // 3.4
 
+            List<DeletedEmails> deletedEmails = deletedEmailsService.findByUsername(userid);
+
             for (Message msg : temp) {
                 String sender = msg.getFrom()[0].toString();
+                // 보낸 사람과 받는 사람이 같으면
                 if (sender.equals(userid)) {
-                    result++;
+                    // 삭제되지 않았다면
+                    boolean found = false;
+                    for(DeletedEmails deletedEmail : deletedEmails) {
+                        if(deletedEmail.getReceivedDate().compareTo(msg.getSentDate()) == 0){
+                            found = true;
+                            break;
+                        }
+                    }
+                    if(found){
+                        result++;
+                    }
                 }
             }
             folder.close(true);  // 3.7
