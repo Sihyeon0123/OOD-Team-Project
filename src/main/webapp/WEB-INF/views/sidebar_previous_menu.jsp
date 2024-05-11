@@ -11,6 +11,11 @@
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <title>JSP Page</title>
+        <script>
+            function goBack() {
+                window.history.back();
+            }
+        </script>
     </head>
     <body>
         <br> <br> 
@@ -18,7 +23,7 @@
         <span style="color: indigo">
             <strong>사용자: <%= session.getAttribute("userid") %> </strong>
         </span> <br> <br>
-        
-        <a href="main_menu"> 이전 메뉴로 </a>
+
+        <a href="javascript:history.back()">뒤로가기</a>
     </body>
 </html>

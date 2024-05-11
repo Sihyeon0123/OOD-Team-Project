@@ -8,10 +8,12 @@ import deu.cse.spring_webmail.entity.SentEmail;
 import deu.cse.spring_webmail.entity.Users;
 import deu.cse.spring_webmail.repository.SentEmailRepository;
 import java.util.Date;
-import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 /**
  *
@@ -19,12 +21,8 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Service
 public class SentEmailService {
-
     private final SentEmailRepository sentEmailRepository;
 
-    /**
-     * 생성자
-     */
     @Autowired
     public SentEmailService(SentEmailRepository sentEmailRepository) {
         this.sentEmailRepository = sentEmailRepository;
@@ -33,16 +31,14 @@ public class SentEmailService {
     /**
      * 이메일을 발신 메일함에 저장
      */
-    public boolean saveSentEmail(String Username, String subject, String content, Date sentAt) {
+    public boolean saveSentEmail(String username, String subject, String content, Date sentAt, String sender) {
         try {
-            Users temp = new Users();
-            temp.setUsername(Username);
-           
+            Users user = new Users();
+            user.setUsername(username);
+
             SentEmail sentEmail = new SentEmail();
-            sentEmail.setUser(temp);
-            
-//            sentEmail.setRecipient(recipient);
-            //sentEmail.setCc(cc);
+            sentEmail.setSender(sender);
+            sentEmail.setUser(user);
             sentEmail.setSubject(subject);
             sentEmail.setContent(content);
             sentEmail.setSentAt(sentAt);
@@ -54,16 +50,27 @@ public class SentEmailService {
         }
     }
 
-    /** username 및 mailID를 이용하여 제거 */
-    @Transactional
-    public void deleteSentEmail(String username, Date sentAt) {
-        this.sentEmailRepository.deleteByUserUsernameAndSentAt(username, sentAt);
+    public void deleteSentEmail(Long id) {
+        sentEmailRepository.deleteById(id);
     }
     /**
      * 발신자의 사용자 이름을 기준으로 발신 메일함의 메일 값을 가져온다
      */
-    public List<SentEmail> findByUsername(String username) {
-        return this.sentEmailRepository.findByUserUsername(username);
+    public Page<SentEmail> findByUsername(String username, int page, int pageSize) {
+        Pageable pageable = PageRequest.of(page-1, pageSize);
+        return this.sentEmailRepository.findByUserUsernameOrderBySentAtDesc(username, pageable);
+    }
+
+    public boolean isNameMatchingCurrentUserById(Long id, String username) {
+        SentEmail sentEmail = this.sentEmailRepository.findById(id).get();
+        if (sentEmail.getUser().getUsername().equals(username)) {
+            return true;
+        }
+        return false;
+    }
+
+    public SentEmail findById(Long id) {
+        return this.sentEmailRepository.findById(id).get();
     }
 }
 

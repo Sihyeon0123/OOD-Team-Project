@@ -4,12 +4,18 @@
  */
 package deu.cse.spring_webmail.model;
 
+import deu.cse.spring_webmail.entity.SentEmail;
 import jakarta.mail.Message;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.List;
+import java.util.Locale;
 
 /**
  *
@@ -178,39 +184,43 @@ public class MessageFormatter {
 
         return buffer.toString();
     }
-    public String getSentTable(Message[] messages) {
+    public String getSentTable(List<SentEmail> msg, int page, int pageSize) {
         StringBuilder buffer = new StringBuilder();
 
         // 메시지 제목 보여주기
         buffer.append("<table>");  // table start
         buffer.append("<tr> "
                 + " <th> No. </td> "
-                + " <th> 보낸 사람 </td>"
                 + " <th> 제목 </td>     "
                 + " <th> 보낸 날짜 </td>   "
                 + " <th> 삭제 </td>   "
                 + " </tr>");
+            int i=1;
+            for (SentEmail sent : msg) {
+                Date date = sent.getSentAt();
+                SimpleDateFormat outputFormat = new SimpleDateFormat("E MMM dd HH:mm:ss", Locale.ENGLISH);
+                String formattedDateTime = outputFormat.format(date);
+                buffer.append("<tr> "
+                        + " <td id=sender>" + (((page-1)*pageSize) + i++) + "</td>"
+                        + " <td id=subject> ");
+                // JavaScript를 사용하여 폼을 동적으로 생성하고 POST 요청을 수행합니다.
+                buffer.append("<form id=\"readForm\" method=\"post\" action=\"read_sent_mail\">");
+                buffer.append("<input type=\"hidden\" name=\"id\" value=\"" + sent.getId() + "\">");
+                buffer.append("<a href=\"#\" onclick=\"document.getElementById('readForm').submit();\" title=\"메일 보기\">" + sent.getSubject() + "</a>");
+                buffer.append("</form>");
 
-        for (int i = messages.length - 1; i >= 0; i--) {
-            MessageParser parser = new MessageParser(messages[i], userid);
-            parser.parse(false);  // envelope 정보만 필요
-            // 메시지 헤더 포맷
-            // 추출한 정보를 출력 포맷 사용하여 스트링으로 만들기
-            
-            if (parser.getFromAddress().equals(userid)) {
+                buffer.append("</td>"
+                        + " <td id=date>" + formattedDateTime + "</td>"
+                        + " <td id=delete>");
+                buffer.append("<form id=\"deleteForm\" method=\"post\" action=\"delete_sent_mail\">");
+                buffer.append("<input type=\"hidden\" name=\"id\" value=\"" + sent.getId() + "\">");
+                buffer.append("<a href=\"#\" onclick=\"document.getElementById('deleteForm').submit();\"> 삭제 </a>");
+                buffer.append("</form>");
 
-            buffer.append("<tr> "
-                    + " <td id=sender>" + parser.getFromAddress() + "</td>"
-                    + " <td id=subject> "
-                    + " <a href=show_message?msgid=" + (i + 1) + " title=\"메일 보기\"> "
-                    + parser.getSubject() + "</a> </td>"
-                    + " <td id=date>" + parser.getSentDate() + "</td>"
-                    + " <td id=delete>"
-                    + "<a href=trash.do"
-                    + "?msgid=" + messages[i].getMessageNumber() + "> 삭제 </a>" + "</td>"
-                    + " </tr>");
+                buffer.append("</td>"
+                        + " </tr>");
+
             }
-        }
         buffer.append("</table>");
 
         return buffer.toString();

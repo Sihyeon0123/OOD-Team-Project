@@ -42,7 +42,9 @@ public class WriteController {
     private ServletContext ctx;
     @Autowired
     private HttpSession session;
-    
+    @Autowired
+    private SentEmailService sentEmailService;
+
     @GetMapping("/write_mail")
     public String writeMail() {
         log.debug("write_mail called...");
@@ -98,19 +100,9 @@ public class WriteController {
      * @return 
      */
     
-    @Autowired
-    private SentEmailService sentEmailService;
-    
     private boolean sendMessage(String to, String cc, String subject, String body, MultipartFile upFile) {
         boolean status = false;
 
-        // 1. toAddress, ccAddress, subject, body, file1 정보를 파싱하여 추출
-
-
-        // 2.  request 객체에서 HttpSession 객체 얻기
-
-
-        // 3. HttpSession 객체에서 메일 서버, 메일 사용자 ID 정보 얻기
         String host = (String) session.getAttribute("host");
         String userid = (String) session.getAttribute("userid");
 
@@ -132,7 +124,7 @@ public class WriteController {
         if (agent.sendMessage()) {
             status = true;
             try {
-                sentEmailService.saveSentEmail(to, subject, body, new Date());
+                sentEmailService.saveSentEmail(userid, subject, body, new Date(), to);
             } catch (Exception e) {
                 log.error("Failed to save sent email record: {}", e.getMessage());
                 // 실패 로그 기록, 실패 처리 등 필요한 경우 추가 작업 수행

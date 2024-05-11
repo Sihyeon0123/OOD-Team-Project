@@ -5,6 +5,7 @@
 package deu.cse.spring_webmail.control;
 
 import deu.cse.spring_webmail.entity.SentEmail;
+import deu.cse.spring_webmail.model.MessageFormatter;
 import deu.cse.spring_webmail.model.Pop3Agent;
 import deu.cse.spring_webmail.service.DeletedEmailsService;
 import deu.cse.spring_webmail.service.SentEmailService;
@@ -29,6 +30,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -36,6 +38,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
@@ -56,6 +59,8 @@ public class ReadController {
     private HttpServletRequest request;
     @Autowired
     private DeletedEmailsService deletedEmailsService;
+    @Autowired
+    private SentEmailService sentEmailService;
 
     @Value("${file.download_folder}")
     private String DOWNLOAD_FOLDER;
@@ -164,27 +169,56 @@ public class ReadController {
         
         return "redirect:trash";
     }
-
-    
-    @Autowired
-    private SentEmailService sentEmailService;
     
     @GetMapping("/show_sent_mail")
-    public String showSent(Model model, Principal principal) {
-        // 현재 로그인한 사용자의 이름을 동적으로 가져옴
-        String username = principal.getName();
-
-        // 사용자 이름을 기준으로 발신 메일 목록을 조회
-        List<SentEmail> SentEmail = sentEmailService.findByUsername(username);
-
-        // 조회한 발신 메일 목록을 모델에 추가하여 뷰에 전달
-        model.addAttribute("SentEmail", SentEmail);
-  
-        //model.addAttribute("SentList", SentList);
+    public String showSent(@RequestParam(name = "page", defaultValue = "1") int page,Model model) {
         log.debug("show_sent_mail called...");
+
+        // 현재 로그인한 사용자의 이름을 동적으로 가져옴
+        String username = (String) session.getAttribute("userid");
+
+        Page<SentEmail> pageSentEmail = sentEmailService.findByUsername(username, page, pageSize);
+        List<SentEmail> sentEmail = pageSentEmail.getContent();
+
+        MessageFormatter msgFormatter = new MessageFormatter(username);
+        // 조회한 발신 메일 목록을 모델에 추가하여 뷰에 전달
+        model.addAttribute("SentEmail", msgFormatter.getSentTable(sentEmail, page, pageSize));
+        model.addAttribute("maxPageNumber", pageSentEmail.getTotalPages());
+
         return "read_mail/show_sent_mail";
     }
-    
+
+    @PostMapping("/read_sent_mail")
+    public String readSentMail(@RequestParam(name = "id") Long id, Model model) {
+        log.debug("read_sent_mail called...");
+        // 현재 로그인한 사용자의 이름을 동적으로 가져옴
+        String username = (String) session.getAttribute("userid");
+        if(sentEmailService.isNameMatchingCurrentUserById(id, username)){
+            SentEmail mail = sentEmailService.findById(id);
+            model.addAttribute("sender", mail.getSender());
+            model.addAttribute("sentAt", mail.getSentAt());
+            model.addAttribute("subject", mail.getSubject());
+            model.addAttribute("content", mail.getContent());
+        }else{
+            log.error("잘못된 접근입니다.");
+        }
+        return "read_mail/read_sent_mail";
+    }
+
+    @PostMapping("/delete_sent_mail")
+    public String deleteSentMail(@RequestParam(name = "id") Long id) {
+        log.debug("delete_sent_mail called...");
+        // 현재 로그인한 사용자의 이름을 동적으로 가져옴
+        String username = (String) session.getAttribute("userid");
+        if(sentEmailService.isNameMatchingCurrentUserById(id, username)){
+            log.debug("Sent Mail Delete success");
+            sentEmailService.deleteSentEmail(id);
+        }else{
+            log.error("Sent Mail Delete failed");
+        }
+
+        return "redirect:show_sent_mail";
+    }
     
     @GetMapping("/show_send_me")
     public String showSendMe(@RequestParam(name = "page", defaultValue = "1") int page, Model model) {

@@ -28,11 +28,15 @@ public class SentEmail {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // 수신자
+    // 송신자
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "username", referencedColumnName = "username", nullable = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Users user;
+    
+    // 수신자
+    @Column(nullable = false)
+    private String sender;
 
     // 제목
     @Column(nullable = false)

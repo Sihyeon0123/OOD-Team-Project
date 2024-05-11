@@ -12,13 +12,6 @@
 <%@include file="../checking_session.jspf"%>
 <!DOCTYPE html>
 
-<jsp:useBean id="pop3" scope="page" class="deu.cse.spring_webmail.model.Pop3Agent" />
-<%
-            pop3.setHost((String) session.getAttribute("host"));
-            pop3.setUserid((String) session.getAttribute("userid"));
-            pop3.setPassword((String) session.getAttribute("password"));
-%>
-
 <html>
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
@@ -40,7 +33,12 @@
         <div id="main">
             ${SentEmail}
         </div>
-
+        <br/>
+        <div style="text-align: center;">
+            <c:forEach var="page" begin="1" end="${maxPageNumber}" varStatus="status">
+                <a href="/webmail/show_sent_mail?page=${status.index}" style="font-size: 20px; display: inline-block; text-align: center;">${status.index}</a>
+            </c:forEach>
+        </div>
         <%@include file="../footer.jspf"%>
     </body>
 </html>
