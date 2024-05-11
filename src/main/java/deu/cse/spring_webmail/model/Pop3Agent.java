@@ -461,7 +461,79 @@ public class Pop3Agent {
             return result;
         }
     }
-    
+
+    public String getSearchList(DeletedEmailsService deletedEmailsService, String category, String searchKeyword) {
+        String result = "";
+        Message[] filteredMessages = null;
+        Message[] temp = null;
+        List<Message> filteredMessageList = new ArrayList<>();
+        List<Message> filteredMessageList2 = new ArrayList<>();
+        // 휴지통에 들어있는 메일 ID를 가져온다.
+        List<DeletedEmails> deletedEmailList = deletedEmailsService.findByUsername(userid);
+
+        if (!connectToStore()) {  // 3.1
+            log.error("POP3 connection failed!");
+            return "POP3 연결이 되지 않아 메일 목록을 볼 수 없습니다.";
+        }
+        try {
+            // 메일 폴더 열기
+            Folder folder = store.getFolder("INBOX");  // 3.2
+            folder.open(Folder.READ_ONLY);  // 3.3
+
+            // 현재 수신한 메시지 모두 가져오기
+            temp = folder.getMessages();      // 3.4
+            log.error("\n\n 처음 메시지의 개수: {}",temp.length);
+
+            for (int i = temp.length; --i >= 0; ) {
+                boolean found = false;
+                for (DeletedEmails deletedEmail : deletedEmailList) {
+                    if (deletedEmail.getReceivedDate().compareTo(temp[i].getSentDate()) == 0) {
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found) {
+                    filteredMessageList.add(temp[i]);
+                }
+            }
+
+            log.error("\n\n처음 필터된 메시지 개수: {}", filteredMessageList.size());
+
+            if("title".equals(category)){
+                for(int i=0 ;i<filteredMessageList.size(); i++){
+                    if(filteredMessageList.get(i).getSubject().equals(searchKeyword)){
+                       filteredMessageList2.add(filteredMessageList.get(i));
+                    }
+                }
+            } else if("sender".equals(category)){
+                for(Message msg : filteredMessageList){
+                    MessageParser messageParser = new MessageParser(msg, userid);
+                    messageParser.parse(false);
+                    if(messageParser.getFromAddress().equals(searchKeyword)){
+                        filteredMessageList2.add(msg);
+                    }
+                }
+            }
+
+            filteredMessages = filteredMessageList2.toArray(new Message[0]);
+            FetchProfile fp = new FetchProfile();
+            // From, To, Cc, Bcc, ReplyTo, Subject & Date
+            fp.add(FetchProfile.Item.ENVELOPE);
+            folder.fetch(filteredMessages, fp);
+
+            MessageFormatter formatter = new MessageFormatter(userid);  //3.5
+            result = formatter.getSearchTable(filteredMessages);   // 3.6
+
+            folder.close(true);  // 3.7
+            store.close();       // 3.8
+        } catch (Exception ex) {
+            log.error("Pop3Agent.getSearchList() : exception = {}", ex.getMessage());
+            result = "Pop3Agent.getSearchList() : exception = " + ex.getMessage();
+        } finally {
+            return result;
+        }
+    }
+
     /**POP3 프로토콜을 사용하여 이메일 서버에 연결하는 메서드입니다.
      * 호스트, 사용자 ID 및 비밀번호를 사용하여 이메일 서버에 연결하고, 연결 상태를 반환합니다.*/
     private boolean connectToStore() {

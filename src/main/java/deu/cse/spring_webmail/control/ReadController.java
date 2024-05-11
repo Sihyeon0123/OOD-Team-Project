@@ -279,6 +279,20 @@ public class ReadController {
         return "redirect:main_menu";
     }
 
+    @PostMapping("/search.do")
+    public String search(@RequestParam String searchKeyword, @RequestParam String searchCategory, Model model) {
+        log.debug("search() called...");
+        log.debug("\n\n{} {}\n\n",searchKeyword, searchCategory);
+        Pop3Agent pop3 = new Pop3Agent();
+        pop3.setHost((String) session.getAttribute("host"));
+        pop3.setUserid((String) session.getAttribute("userid"));
+        pop3.setPassword((String) session.getAttribute("password"));
+        String messageList = pop3.getSearchList(this.deletedEmailsService, searchCategory, searchKeyword);
+        model.addAttribute("messageList", messageList);
+
+        return "main_menu";
+    }
+
     @GetMapping("/restore_mail.do")
     public String restoreMailDo(@RequestParam("msgid") int msgId, RedirectAttributes attrs) {
         log.debug("restore_mail.do: msgid = {}", msgId);
@@ -295,4 +309,5 @@ public class ReadController {
         attrs.addFlashAttribute("msg", "메시지를 복구하였습니다.");
         return "redirect:trash";
     }
+
 }

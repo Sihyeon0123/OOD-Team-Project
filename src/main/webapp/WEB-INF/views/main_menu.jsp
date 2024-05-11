@@ -30,6 +30,13 @@
 
         <!-- 메시지 삭제 링크를 누르면 바로 삭제되어 실수할 수 있음. 해결 방법은? -->
         <div id="main">
+            <form action="search.do" method="POST" style="padding-left: 15px">
+                <select name="searchCategory"><option value="title">제목</option><option value="sender">발신자</option></select>
+                <input type="text" name="searchKeyword">
+                <input type="submit" value="검색">
+            </form>
+            <br/>
+
             ${messageList}
             <br/>
             <div style="text-align: center;">

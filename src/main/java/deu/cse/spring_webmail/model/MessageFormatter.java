@@ -59,7 +59,7 @@ public class MessageFormatter {
                     + " <td id=no>" + (((page-1)*pageSize)+i+1) + " </td> "
                     + " <td id=sender>" + parser.getFromAddress() + "</td>"
                     + " <td id=subject> "
-                    + " <a href=show_message?msgid=" + (i + 1) + " title=\"메일 보기\"> "
+                    + " <a href=show_message?msgid=" + messages[i].getMessageNumber() + " title=\"메일 보기\"> "
                     + parser.getSubject() + "</a> </td>"
                     + " <td id=date>" + parser.getSentDate() + "</td>"
                     + " <td id=delete>"
@@ -224,6 +224,43 @@ public class MessageFormatter {
         buffer.append("</table>");
 
         return buffer.toString();
+    }
+
+    public String getSearchTable(Message[] messages) {
+        StringBuilder buffer = new StringBuilder();
+
+        // 메시지 제목 보여주기
+        buffer.append("<table>");  // table start
+        buffer.append("<tr> "
+                + " <th> No. </td> "
+                + " <th> 보낸 사람 </td>"
+                + " <th> 제목 </td>     "
+                + " <th> 보낸 날짜 </td>   "
+                + " <th> 삭제 </td>   "
+                + " </tr>");
+
+//        for (int i = messages.length - 1, no=1; i >= 0; i--, no++) {
+        for(int i=0; i<messages.length; i++) {
+            MessageParser parser = new MessageParser(messages[i], userid);
+            parser.parse(false);  // envelope 정보만 필요
+            // 메시지 헤더 포맷
+            // 추출한 정보를 출력 포맷 사용하여 스트링으로 만들기
+            buffer.append("<tr> "
+                    + " <td id=no>" + (i+1) + " </td> "
+                    + " <td id=sender>" + parser.getFromAddress() + "</td>"
+                    + " <td id=subject> "
+                    + " <a href=show_message?msgid=" + messages[i].getMessageNumber() + " title=\"메일 보기\"> "
+                    + parser.getSubject() + "</a> </td>"
+                    + " <td id=date>" + parser.getSentDate() + "</td>"
+                    + " <td id=delete>"
+                    + "<a href=trash.do"
+                    + "?msgid=" + messages[i].getMessageNumber() + "> 삭제 </a>" + "</td>"
+                    + " </tr>");
+        }
+        buffer.append("</table>");
+
+        return buffer.toString();
+//        return "MessageFormatter 테이블 결과";
     }
 
 }
