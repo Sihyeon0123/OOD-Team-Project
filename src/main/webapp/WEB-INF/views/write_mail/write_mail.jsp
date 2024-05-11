@@ -20,7 +20,7 @@
         <%@include file="../header.jspf"%>
 
         <div id="sidebar">
-            <jsp:include page="../sidebar_previous_menu.jsp" />
+            <jsp:include page="sidebar_write_mail.jsp" />
         </div>
 
         <div id="main">
