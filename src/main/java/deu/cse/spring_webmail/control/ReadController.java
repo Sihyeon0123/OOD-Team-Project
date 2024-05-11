@@ -4,8 +4,10 @@
  */
 package deu.cse.spring_webmail.control;
 
+import deu.cse.spring_webmail.entity.SentEmail;
 import deu.cse.spring_webmail.model.Pop3Agent;
 import deu.cse.spring_webmail.service.DeletedEmailsService;
+import deu.cse.spring_webmail.service.SentEmailService;
 import jakarta.mail.internet.MimeUtility;
 import java.io.File;
 import java.io.IOException;
@@ -19,7 +21,8 @@ import java.util.Date;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
-import java.util.ArrayList;
+import java.security.Principal;
+import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -162,6 +165,27 @@ public class ReadController {
         return "redirect:trash";
     }
 
+    
+    @Autowired
+    private SentEmailService sentEmailService;
+    
+    @GetMapping("/show_sent_mail")
+    public String showSent(Model model, Principal principal) {
+        // 현재 로그인한 사용자의 이름을 동적으로 가져옴
+        String username = principal.getName();
+
+        // 사용자 이름을 기준으로 발신 메일 목록을 조회
+        List<SentEmail> SentEmail = sentEmailService.findByUsername(username);
+
+        // 조회한 발신 메일 목록을 모델에 추가하여 뷰에 전달
+        model.addAttribute("SentEmail", SentEmail);
+  
+        //model.addAttribute("SentList", SentList);
+        log.debug("show_sent_mail called...");
+        return "read_mail/show_sent_mail";
+    }
+    
+    
     @GetMapping("/show_send_me")
     public String showSendMe(@RequestParam(name = "page", defaultValue = "1") int page, Model model) {
         log.debug("show_send_me called...");

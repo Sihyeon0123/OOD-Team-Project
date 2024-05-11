@@ -5,12 +5,14 @@
 package deu.cse.spring_webmail.control;
 
 import deu.cse.spring_webmail.model.SmtpAgent;
+import deu.cse.spring_webmail.service.SentEmailService;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.http.HttpSession;
+import java.util.Date;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -95,6 +97,10 @@ public class WriteController {
      * @param upFile
      * @return 
      */
+    
+    @Autowired
+    private SentEmailService sentEmailService;
+    
     private boolean sendMessage(String to, String cc, String subject, String body, MultipartFile upFile) {
         boolean status = false;
 
@@ -125,6 +131,12 @@ public class WriteController {
         // 5. 메일 전송 권한 위임
         if (agent.sendMessage()) {
             status = true;
+            try {
+                sentEmailService.saveSentEmail(to, subject, body, new Date());
+            } catch (Exception e) {
+                log.error("Failed to save sent email record: {}", e.getMessage());
+                // 실패 로그 기록, 실패 처리 등 필요한 경우 추가 작업 수행
+            }            
         }
         return status;
     }  // sendMessage()
