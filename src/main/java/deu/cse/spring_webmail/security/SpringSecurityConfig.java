@@ -82,7 +82,7 @@ public class SpringSecurityConfig {
         http.authorizeHttpRequests(authorizeRequests -> authorizeRequests
                 .dispatcherTypeMatchers(DispatcherType.FORWARD).permitAll()
                 .requestMatchers("/admin_menu", "/add_user").hasRole("ADMIN")
-                .requestMatchers("/main_menu", "/change_password", "/change_password.do", "/show_message", "/write_mail", "/show_message", "/test", "/trash", "/show_send_me", "/show_sent_mail").hasAnyRole("USER", "ADMIN")
+                .requestMatchers("/main_menu", "/change_password", "/change_password.do", "/show_message", "/write_mail", "/show_message", "/test", "/trash", "/show_send_me", "/show_sent_mail", "/addressbook").hasAnyRole("USER", "ADMIN")
                 .requestMatchers("/", "/login.do", "/isUserIDDuplicate", "/signup", "/signup.do", "/login_fail").permitAll()
                 .anyRequest().authenticated()
         );
