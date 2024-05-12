@@ -214,7 +214,15 @@ public class MessageFormatter {
                         + " <td id=delete>");
                 buffer.append("<form id=\"deleteForm\" method=\"post\" action=\"delete_sent_mail\">");
                 buffer.append("<input type=\"hidden\" name=\"id\" value=\"" + sent.getId() + "\">");
-                buffer.append("<a href=\"#\" onclick=\"document.getElementById('deleteForm').submit();\"> 삭제 </a>");
+                buffer.append("<a href=\"#\" onclick=\"confirmDelete();\"> 삭제" +
+                        "<script>\n" +
+                        "        function confirmDelete() {\n" +
+                        "            if (confirm(\"정말로 삭제하시겠습니까?\")) {\n" +
+                        "                document.getElementById('deleteForm').submit();\n" +
+                        "            }\n" +
+                        "        }\n" +
+                        "    </script>" +
+                        " </a>");
                 buffer.append("</form>");
 
                 buffer.append("</td>"

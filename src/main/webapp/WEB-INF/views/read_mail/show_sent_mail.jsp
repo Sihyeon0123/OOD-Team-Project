@@ -17,28 +17,25 @@
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <title>발신 메일 화면</title>
         <link type="text/css" rel="stylesheet" href="css/main_style.css" />
-        <script>
-            <c:if test="${!empty msg}">
-            alert("${msg}");
-            </c:if>
-        </script>
     </head>
     <body>
-        <%@include file="../header.jspf"%>
+    <%@include file="../header.jspf" %>
 
-        <div id="sidebar">
-            <jsp:include page="../sidebar_menu.jsp" />
-        </div>
+    <div id="sidebar">
+        <jsp:include page="../sidebar_menu.jsp"/>
+    </div>
 
-        <div id="main">
-            ${SentEmail}
-        </div>
-        <br/>
-        <div style="text-align: center;">
-            <c:forEach var="page" begin="1" end="${maxPageNumber}" varStatus="status">
-                <a href="/webmail/show_sent_mail?page=${status.index}" style="font-size: 20px; display: inline-block; text-align: center;">${status.index}</a>
-            </c:forEach>
-        </div>
-        <%@include file="../footer.jspf"%>
+    <div id="main">
+        <h2>발신 메일함</h2>
+        ${SentEmail}
+    </div>
+    <br/>
+    <div style="text-align: center;">
+        <c:forEach var="page" begin="1" end="${maxPageNumber}" varStatus="status">
+            <a href="/webmail/show_sent_mail?page=${status.index}"
+               style="font-size: 20px; display: inline-block; text-align: center;">${status.index}</a>
+        </c:forEach>
+    </div>
+    <%@include file="../footer.jspf" %>
     </body>
 </html>

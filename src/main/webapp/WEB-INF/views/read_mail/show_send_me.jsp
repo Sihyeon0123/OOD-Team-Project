@@ -21,7 +21,7 @@
 <html>
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        <title>보낸 메일 화면</title>
+        <title>내게 보낸 메일</title>
         <link type="text/css" rel="stylesheet" href="css/main_style.css" />
         <script>
             <c:if test="${!empty msg}">
@@ -37,6 +37,7 @@
         </div>
 
         <div id="main">
+            <h2>내게 보낸 메일</h2>
             ${sendMeList}
             <br/>
             <div style="text-align: center;">

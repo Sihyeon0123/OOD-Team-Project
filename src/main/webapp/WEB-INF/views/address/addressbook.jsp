@@ -30,7 +30,6 @@
                     form.submit();
                 }
             }
-
             <c:if test="${!empty msg}">
             alert("${msg}");
             </c:if>
