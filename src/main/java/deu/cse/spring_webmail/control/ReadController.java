@@ -201,6 +201,7 @@ public class ReadController {
             model.addAttribute("content", mail.getContent());
         }else{
             log.error("잘못된 접근입니다.");
+            return "show_sent_mail";
         }
         return "read_mail/read_sent_mail";
     }

@@ -56,7 +56,7 @@ public class MessageFormatter {
             // 메시지 헤더 포맷
             // 추출한 정보를 출력 포맷 사용하여 스트링으로 만들기
             buffer.append("<tr> "
-                    + " <td id=no>" + (((page-1)*pageSize)+i+1) + " </td> "
+                    + " <td id=id>" + (((page-1)*pageSize)+i+1) + " </td> "
                     + " <td id=sender>" + parser.getFromAddress() + "</td>"
                     + " <td id=subject> "
                     + " <a href=show_message?msgid=" + messages[i].getMessageNumber() + " title=\"메일 보기\"> "
@@ -93,7 +93,7 @@ public class MessageFormatter {
             // 추출한 정보를 출력 포맷 사용하여 스트링으로 만들기
             if((page-1)*pageSize <= i && i < page * pageSize) {
                 buffer.append("<tr> "
-                        + " <td id=no>" + (i+1) + " </td> "
+                        + " <td id=id>" + (i+1) + " </td> "
                         + " <td id=sender>" + parser.getFromAddress() + "</td>"
                         + " <td id=subject> "
                         + " <a href=show_message?msgid=" + messages[i].getMessageNumber() + " title=\"메일 보기\"> "
@@ -166,9 +166,9 @@ public class MessageFormatter {
                 // 현재 페이지만 출력 되도록 수정
                 if((page-1)*pageSize <= count && count < page * pageSize){
                     buffer.append("<tr> "
-                            + " <td id=no>" + (count+1) + " </td> "
+                            + " <td id=id>" + (count+1) + " </td> "
                             + " <td id=subject> "
-                            + " <a href=show_message?msgid=" + (i + 1) + " title=\"메일 보기\"> "
+                            + " <a href=show_message?msgid=" + messages[i].getMessageNumber() + " title=\"메일 보기\"> "
                             + parser.getSubject() + "</a> </td>"
                             + " <td id=date>" + parser.getSentDate() + "</td>"
                             + " <td id=delete>"
@@ -197,39 +197,45 @@ public class MessageFormatter {
                 + " <th> 삭제 </td>   "
                 + " </tr>");
             int i=1;
-            for (SentEmail sent : msg) {
-                Date date = sent.getSentAt();
-                SimpleDateFormat outputFormat = new SimpleDateFormat("E MMM dd HH:mm:ss", Locale.ENGLISH);
-                String formattedDateTime = outputFormat.format(date);
-                buffer.append("<tr> "
-                        + " <td id=sender>" + (((page-1)*pageSize) + i++) + "</td>" + " <td>" + sent.getReceiver() + "</td>"
+        for (SentEmail sent : msg) {
+            Date date = sent.getSentAt();
+            SimpleDateFormat outputFormat = new SimpleDateFormat("E MMM dd HH:mm:ss", Locale.ENGLISH);
+            String formattedDateTime = outputFormat.format(date);
+            buffer.append("<tr> "
+                        + " <td id=id>" + (((page-1)*pageSize) + i++) + "</td>" + " <td id=sender>" + sent.getReceiver() + "</td>"
                         + " <td id=subject> ");
-                // JavaScript를 사용하여 폼을 동적으로 생성하고 POST 요청을 수행합니다.
-                buffer.append("<form id=\"readForm\" method=\"post\" action=\"read_sent_mail\">");
-                buffer.append("<input type=\"hidden\" name=\"id\" value=\"" + sent.getId() + "\">");
-                buffer.append("<a href=\"#\" onclick=\"document.getElementById('readForm').submit();\" title=\"메일 보기\">" + sent.getSubject() + "</a>");
-                buffer.append("</form>");
 
-                buffer.append("</td>"
-                        + " <td id=date>" + formattedDateTime + "</td>"
-                        + " <td id=delete>");
-                buffer.append("<form id=\"deleteForm\" method=\"post\" action=\"delete_sent_mail\">");
-                buffer.append("<input type=\"hidden\" name=\"id\" value=\"" + sent.getId() + "\">");
-                buffer.append("<a href=\"#\" onclick=\"confirmDelete();\"> 삭제" +
-                        "<script>\n" +
-                        "        function confirmDelete() {\n" +
-                        "            if (confirm(\"정말로 삭제하시겠습니까?\")) {\n" +
-                        "                document.getElementById('deleteForm').submit();\n" +
-                        "            }\n" +
-                        "        }\n" +
-                        "    </script>" +
-                        " </a>");
-                buffer.append("</form>");
+            // JavaScript를 사용하여 폼을 동적으로 생성하고 POST 요청을 수행합니다.
+            buffer.append("<a href=\"#\" onclick=\"readMail(" + sent.getId() + ");\" title=\"메일보기\">" + sent.getSubject() + "</a>");
+            buffer.append("<form id=\"readForm_" + sent.getId() + "\" method=\"post\" action=\"read_sent_mail\" style=\"display: none;\">");
+            buffer.append("<input type=\"hidden\" name=\"id\" value=\"" + sent.getId() + "\">");
+            buffer.append("</form>" +
+                          "</td>");
 
-                buffer.append("</td>"
-                        + " </tr>");
+            buffer.append("<td id=date>" + formattedDateTime + "</td>" +
+                          " <td id=delete>");
+            buffer.append("<a href=\"#\" onclick=\"deleteMail(" + sent.getId() + ");\" title=\"삭제\"> 삭제</a>");
+            buffer.append("<form id=\"deleteForm_" + sent.getId() + "\" method=\"post\" action=\"delete_sent_mail\" style=\"display: none;\">");
+            buffer.append("<input type=\"hidden\" name=\"id\" value=\"" + sent.getId() + "\">");
+            buffer.append("</form>");
+            buffer.append("</td>"
+                        + "</tr>");
+        }
 
-            }
+        // 페이지 하단에 JavaScript 스크립트 추가
+        buffer.append("<script>");
+        buffer.append("function deleteMail(id) {");
+        buffer.append("    if (confirm(\"정말로 삭제하시겠습니까?\")) {");
+        buffer.append("        var form = document.getElementById(\"deleteForm_\" + id);");
+        buffer.append("        form.submit();");
+        buffer.append("    }");
+        buffer.append("}");
+        buffer.append("function readMail(id) {");
+        buffer.append("    var form = document.getElementById(\"readForm_\" + id);");
+        buffer.append("    form.submit();");
+        buffer.append("}");
+        buffer.append("</script>");
+
         buffer.append("</table>");
 
         return buffer.toString();
@@ -255,7 +261,7 @@ public class MessageFormatter {
             // 메시지 헤더 포맷
             // 추출한 정보를 출력 포맷 사용하여 스트링으로 만들기
             buffer.append("<tr> "
-                    + " <td id=no>" + (i+1) + " </td> "
+                    + " <td id=id>" + (i+1) + " </td> "
                     + " <td id=sender>" + parser.getFromAddress() + "</td>"
                     + " <td id=subject> "
                     + " <a href=show_message?msgid=" + messages[i].getMessageNumber() + " title=\"메일 보기\"> "
