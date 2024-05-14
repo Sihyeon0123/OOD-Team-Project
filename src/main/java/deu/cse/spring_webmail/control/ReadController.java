@@ -195,7 +195,7 @@ public class ReadController {
         String username = (String) session.getAttribute("userid");
         if(sentEmailService.isNameMatchingCurrentUserById(id, username)){
             SentEmail mail = sentEmailService.findById(id);
-            model.addAttribute("sender", mail.getSender());
+            model.addAttribute("receiver", mail.getReceiver());
             model.addAttribute("sentAt", mail.getSentAt());
             model.addAttribute("subject", mail.getSubject());
             model.addAttribute("content", mail.getContent());

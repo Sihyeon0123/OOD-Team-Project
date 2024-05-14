@@ -36,7 +36,7 @@ public class SentEmail {
     
     // 수신자
     @Column(nullable = false)
-    private String sender;
+    private String receiver;
 
     // 제목
     @Column(nullable = false)

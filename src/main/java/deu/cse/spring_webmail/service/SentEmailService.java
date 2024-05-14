@@ -31,13 +31,13 @@ public class SentEmailService {
     /**
      * 이메일을 발신 메일함에 저장
      */
-    public boolean saveSentEmail(String username, String subject, String content, Date sentAt, String sender) {
+    public boolean saveSentEmail(String username, String subject, String content, Date sentAt, String receiver) {
         try {
             Users user = new Users();
             user.setUsername(username);
 
             SentEmail sentEmail = new SentEmail();
-            sentEmail.setSender(sender);
+            sentEmail.setReceiver(receiver);
             sentEmail.setUser(user);
             sentEmail.setSubject(subject);
             sentEmail.setContent(content);

@@ -191,6 +191,7 @@ public class MessageFormatter {
         buffer.append("<table>");  // table start
         buffer.append("<tr> "
                 + " <th> No. </td> "
+                + " <th> 수신자 </td> "
                 + " <th> 제목 </td>     "
                 + " <th> 보낸 날짜 </td>   "
                 + " <th> 삭제 </td>   "
@@ -201,7 +202,7 @@ public class MessageFormatter {
                 SimpleDateFormat outputFormat = new SimpleDateFormat("E MMM dd HH:mm:ss", Locale.ENGLISH);
                 String formattedDateTime = outputFormat.format(date);
                 buffer.append("<tr> "
-                        + " <td id=sender>" + (((page-1)*pageSize) + i++) + "</td>"
+                        + " <td id=sender>" + (((page-1)*pageSize) + i++) + "</td>" + " <td>" + sent.getReceiver() + "</td>"
                         + " <td id=subject> ");
                 // JavaScript를 사용하여 폼을 동적으로 생성하고 POST 요청을 수행합니다.
                 buffer.append("<form id=\"readForm\" method=\"post\" action=\"read_sent_mail\">");

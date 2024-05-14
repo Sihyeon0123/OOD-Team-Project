@@ -21,7 +21,7 @@
         </div>
 
         <div id="msgBody">
-            받은 사람: ${sender} <br/>
+            받는 사람: ${receiver} <br/>
             보낸 날짜: ${sentAt} <br/>
             제 &nbsp;&nbsp;&nbsp;  목: ${subject} <br> <hr>
             ${content}
