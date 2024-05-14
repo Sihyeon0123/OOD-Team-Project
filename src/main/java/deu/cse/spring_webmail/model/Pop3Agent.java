@@ -387,15 +387,21 @@ public class Pop3Agent {
             // 현재 수신한 메시지 모두 가져오기
             messages = folder.getMessages();      // 3.4
 
-            for (int i = messages.length; --i >= 0; ) {
-                boolean found = false;
-                for (DeletedEmails deletedEmail : deletedEmailList) {
-                    if (deletedEmail.getReceivedDate().compareTo(messages[i].getSentDate()) != 0) {
-                        found = true;
-                        break;
+            if(!deletedEmailList.isEmpty()) {
+                for (int i = messages.length; --i >= 0; ) {
+                    boolean found = false;
+                    for (DeletedEmails deletedEmail : deletedEmailList) {
+                        if (deletedEmail.getReceivedDate().compareTo(messages[i].getSentDate()) != 0) {
+                            found = true;
+                            break;
+                        }
+                    }
+                    if (found) {
+                        tempList.add(messages[i]);
                     }
                 }
-                if (found) {
+            } else {
+                for (int i = messages.length; --i >= 0; ) {
                     tempList.add(messages[i]);
                 }
             }
