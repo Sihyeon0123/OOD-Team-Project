@@ -41,7 +41,7 @@
         </tr>
         <tr>
             <td><label for="email">이메일:</label></td>
-            <td><input type="email" id="email" name="email" value="${email}" required></td>
+            <td><input type="text" id="email" name="email" value="${email}" required></td>
         </tr>
         <tr>
             <td><label for="phoneNumber">전화번호:</label></td>
