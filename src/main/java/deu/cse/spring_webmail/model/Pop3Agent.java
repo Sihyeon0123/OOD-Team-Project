@@ -507,7 +507,7 @@ public class Pop3Agent {
 
             if("title".equals(category)){
                 for(int i=0 ;i<filteredMessageList.size(); i++){
-                    if(filteredMessageList.get(i).getSubject().equals(searchKeyword)){
+                    if(filteredMessageList.get(i).getSubject().contains(searchKeyword)){
                        filteredMessageList2.add(filteredMessageList.get(i));
                     }
                 }
@@ -515,7 +515,7 @@ public class Pop3Agent {
                 for(Message msg : filteredMessageList){
                     MessageParser messageParser = new MessageParser(msg, userid);
                     messageParser.parse(false);
-                    if(messageParser.getFromAddress().equals(searchKeyword)){
+                    if(messageParser.getFromAddress().contains(searchKeyword)){
                         filteredMessageList2.add(msg);
                     }
                 }
