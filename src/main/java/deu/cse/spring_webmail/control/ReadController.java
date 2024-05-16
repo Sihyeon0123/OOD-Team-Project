@@ -281,8 +281,13 @@ public class ReadController {
     }
 
     @PostMapping("/search.do")
-    public String search(@RequestParam String searchKeyword, @RequestParam String searchCategory, Model model) {
+    public String search(@RequestParam String searchKeyword, @RequestParam String searchCategory, Model model,  RedirectAttributes attrs) {
         log.debug("search() called...");
+        if(searchKeyword.isEmpty()){
+            attrs.addFlashAttribute("msg", "검색 키워드는 1자 이상이어야 합니다.");
+            return "redirect:main_menu";
+        }
+
         log.debug("\n\n{} {}\n\n",searchKeyword, searchCategory);
         Pop3Agent pop3 = new Pop3Agent();
         pop3.setHost((String) session.getAttribute("host"));
