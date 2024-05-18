@@ -148,27 +148,7 @@ public class ReadController {
         return "main_menu";
     }
 
-    @GetMapping("/delete_mail.do")
-    public String deleteMailDo(@RequestParam("msgid") Integer msgId, RedirectAttributes attrs) {
-        log.debug("delete_mail.do: msgid = {}", msgId);
-        
-        String host = (String) session.getAttribute("host");
-        String userid = (String) session.getAttribute("userid");
-        String password = (String) session.getAttribute("password");
 
-        Pop3Agent pop3 = new Pop3Agent(host, userid, password);
-        Date sentDate = pop3.getMessageSentDate(msgId);
-
-        boolean deleteSuccessful = pop3.deleteMessage(msgId, true, userid, request, DOWNLOAD_FOLDER);
-        if (deleteSuccessful) {
-            this.deletedEmailsService.deleteDeletedEmail(userid, sentDate);
-            attrs.addFlashAttribute("msg", "메시지 삭제를 성공하였습니다.");
-        } else {
-            attrs.addFlashAttribute("msg", "메시지 삭제를 실패하였습니다.");
-        }
-        
-        return "redirect:trash";
-    }
     
     @GetMapping("/show_sent_mail")
     public String showSent(@RequestParam(name = "page", defaultValue = "1") int page,Model model) {
@@ -238,47 +218,6 @@ public class ReadController {
         return "read_mail/show_send_me";
     }
 
-    @GetMapping("/trash")
-    public String trash(@RequestParam(name = "page", defaultValue = "1") int page,Model model) {
-        log.debug("trash() called...");
-        Pop3Agent pop3 = new Pop3Agent();
-        pop3.setHost((String) session.getAttribute("host"));
-        pop3.setUserid((String) session.getAttribute("userid"));
-        pop3.setPassword((String) session.getAttribute("password"));
-
-        // 최대 페이지수 반환
-        int maxPageNumber = (int) Math.ceil((double) pop3.getDeletedMessageCount(this.deletedEmailsService) / pageSize);
-        model.addAttribute("maxPageNumber", maxPageNumber);
-        log.info("{}",maxPageNumber);
-
-        // 현재 페이지
-        model.addAttribute("pageNumber", page);
-        String messageList = pop3.getTrashList(this.deletedEmailsService, page, pageSize);
-        model.addAttribute("messageList", messageList);
-        return "trash"; // change_password.jsp로 이동
-    }
-
-    @GetMapping("/trash.do")
-    public String trashDo(@RequestParam("msgid") int msgId, RedirectAttributes attrs) {
-        log.debug("delete_mail.do: msgid = {}", msgId);
-
-        String username = (String) session.getAttribute("userid");
-        Pop3Agent pop3 = new Pop3Agent();
-        pop3.setHost((String) session.getAttribute("host"));
-        pop3.setUserid((String) session.getAttribute("userid"));
-        pop3.setPassword((String) session.getAttribute("password"));
-
-        Date sentDate =  pop3.getMessageSentDate(msgId);
-
-        boolean deleteSuccessful = this.deletedEmailsService.saveDeletedEmail(username, sentDate);
-        if (deleteSuccessful) {
-            attrs.addFlashAttribute("msg", "메시지를 휴지통에 버렸습니다.");
-        } else {
-            attrs.addFlashAttribute("msg", "메시지를 버리지 못하였습니다.");
-        }
-
-        return "redirect:main_menu";
-    }
 
     @PostMapping("/search.do")
     public String search(@RequestParam String searchKeyword, @RequestParam String searchCategory, Model model,  RedirectAttributes attrs) {
@@ -298,22 +237,4 @@ public class ReadController {
 
         return "main_menu";
     }
-
-    @GetMapping("/restore_mail.do")
-    public String restoreMailDo(@RequestParam("msgid") int msgId, RedirectAttributes attrs) {
-        log.debug("restore_mail.do: msgid = {}", msgId);
-        String username = (String) session.getAttribute("userid");
-
-        Pop3Agent pop3 = new Pop3Agent();
-        pop3.setHost((String) session.getAttribute("host"));
-        pop3.setUserid((String) session.getAttribute("userid"));
-        pop3.setPassword((String) session.getAttribute("password"));
-
-        Date sentDate =  pop3.getMessageSentDate(msgId);
-
-        this.deletedEmailsService.deleteDeletedEmail(username, sentDate);
-        attrs.addFlashAttribute("msg", "메시지를 복구하였습니다.");
-        return "redirect:trash";
-    }
-
 }
