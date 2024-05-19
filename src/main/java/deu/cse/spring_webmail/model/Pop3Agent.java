@@ -119,16 +119,13 @@ public class Pop3Agent {
         }
     }
 
-    public boolean deleteMessage(int msgid, boolean really_delete, String userid, HttpServletRequest request, String DOWNLOAD_FOLDER) {
+    public boolean deleteMessage(int msgid, boolean really_delete, String DOWNLOAD_FOLDER) {
         boolean status = false;
-
         if (!connectToStore()) {
             return status;
         }
 
         try {
-            // Folder 설정
-//            Folder folder = store.getDefaultFolder();
             Folder folder = store.getFolder("INBOX");
             folder.open(Folder.READ_WRITE);
 
@@ -144,13 +141,11 @@ public class Pop3Agent {
             // 파일이 존재한다면
             if(fileName != null){
                 // 파일 경로 생성
-                Path path = Paths.get("src/main/webapp", DOWNLOAD_FOLDER, userid, fileName);
+                Path path = Paths.get("src", "main", "webapp", DOWNLOAD_FOLDER, userid, fileName);
                 Path absolutePath = path.toAbsolutePath();
-
                 // 파일 객체 생성
                 File file = new File(absolutePath.toString());
-
-                log.debug("삭제 파일 경로: {}", absolutePath.toString());
+                log.debug("삭제 파일 경로: {}", absolutePath);
 
                 // 서버에 저장된 파일 삭제
                 if (file.exists()) {
@@ -161,7 +156,7 @@ public class Pop3Agent {
                         log.error("{}파일 삭제에 실패하였습니다.", fileName);
                     }
                 } else {
-                    log.error("{}파일이 존재하지 않습니다.", fileName);
+                    log.debug("{}파일이 존재하지 않습니다.", fileName);
                 }
             }
 

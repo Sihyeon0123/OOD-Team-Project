@@ -136,11 +136,11 @@ public class ReadController {
         pop3.setHost((String) session.getAttribute("host"));
         pop3.setUserid((String) session.getAttribute("userid"));
         pop3.setPassword((String) session.getAttribute("password"));
-        String messageList = pop3.getMessageList(this.deletedEmailsService, page, pageSize);
 
+        String messageList = pop3.getMessageList(this.deletedEmailsService, page, pageSize);
         // 최대 페이지수 반환
         int maxPageNumber = (int) Math.ceil((double) pop3.getMessageCount(this.deletedEmailsService) / pageSize);
-
+        log.debug("page = {}, maxPageNumber = {}", page, maxPageNumber);
         model.addAttribute("maxPageNumber", maxPageNumber);
         // 현재 페이지
         model.addAttribute("pageNumber", page);

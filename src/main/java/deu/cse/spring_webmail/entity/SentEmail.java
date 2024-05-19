@@ -48,4 +48,14 @@ public class SentEmail {
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "sent_at", nullable = false)
     private Date sentAt;
+
+    public  Date getSentAt() {
+        return new Date(sentAt.getTime());
+    }
+
+    public Users getUser() {
+        Users temp = new Users();
+        temp.setUsername(user.getUsername());
+        return temp;
+    }
 }

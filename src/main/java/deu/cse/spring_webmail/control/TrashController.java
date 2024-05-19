@@ -42,9 +42,10 @@ public class TrashController {
         String password = (String) session.getAttribute("password");
 
         Pop3Agent pop3 = new Pop3Agent(host, userid, password);
+        pop3.setRequest(request);
         Date sentDate = pop3.getMessageSentDate(msgId);
 
-        boolean deleteSuccessful = pop3.deleteMessage(msgId, true, userid, request, DOWNLOAD_FOLDER);
+        boolean deleteSuccessful = pop3.deleteMessage(msgId, true, DOWNLOAD_FOLDER);
         if (deleteSuccessful) {
             this.deletedEmailsService.deleteDeletedEmail(userid, sentDate);
             attrs.addFlashAttribute("msg", "메시지 삭제를 성공하였습니다.");

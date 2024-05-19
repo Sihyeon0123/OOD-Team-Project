@@ -24,4 +24,10 @@ public class Contact {
     @JoinColumn(name = "username", referencedColumnName = "username", nullable = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Users user;
+
+    public Users getUser() {
+        Users temp = new Users();
+        temp.setUsername(user.getUsername());
+        return temp;
+    }
 }

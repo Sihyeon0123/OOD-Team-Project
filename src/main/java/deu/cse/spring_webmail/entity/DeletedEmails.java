@@ -42,4 +42,10 @@ public class DeletedEmails {
     public Date getReceivedDate() {
         return new Date(receivedDate.getTime());
     }
+
+    public Users getUser() {
+        Users temp = new Users();
+        temp.setUsername(user.getUsername());
+        return temp;
+    }
 }
