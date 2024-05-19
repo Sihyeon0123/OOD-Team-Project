@@ -29,16 +29,21 @@ public class SpringWebmailApplication {
         log.debug("systemProperties() called...");
         PropertiesFactoryBean bean = new PropertiesFactoryBean();
         bean.setLocation(new ClassPathResource("/system.properties"));
-        
-// 사용하지 않는 코드 주석처리
-//        try {
-//            Properties props = bean.getObject();
-//             log.debug("props = {}", props.keySet());
-//        } catch (IOException ex) {
-//            log.error("configProperties: 예외 = {}", ex.getMessage());
-//        }
-        
+        try {
+            // Ensure the properties are loaded
+            bean.afterPropertiesSet();
+            Properties props = bean.getObject();
+            if (props != null) {
+                log.debug("props = {}", props.keySet());
+            } else {
+                log.warn("Properties could not be loaded.");
+            }
+        } catch (IOException ex) {
+            log.error("configProperties: 예외 = {}", ex.getMessage());
+        }
+
         return bean;
     }
+
 
 }

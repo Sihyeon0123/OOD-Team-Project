@@ -9,8 +9,6 @@ import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
 
-@AllArgsConstructor
-@NoArgsConstructor  // 디폴트 생성자 생성
 @Entity
 @Setter @Getter
 public class Contact {

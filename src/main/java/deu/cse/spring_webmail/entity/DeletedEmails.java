@@ -12,8 +12,6 @@ import org.hibernate.annotations.OnDeleteAction;
 
 import java.util.Date;
 
-@AllArgsConstructor
-@NoArgsConstructor
 @Setter
 @Getter
 @Entity

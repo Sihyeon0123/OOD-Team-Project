@@ -99,9 +99,9 @@ public class UserAdminAgent {
             java.util.Arrays.fill(messageBuffer, (byte) 0);
             int bytesRead = is.read(messageBuffer);
             if (bytesRead == -1) {
+                log.error("adduser: End of stream reached");
                 throw new IOException("End of stream reached");
             }
-
             String recvMessage = new String(messageBuffer, StandardCharsets.UTF_8);
             log.debug(recvMessage);
 

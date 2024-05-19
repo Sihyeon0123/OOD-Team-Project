@@ -15,7 +15,6 @@ import java.util.List;
 public interface DeletedEmailsRepository extends JpaRepository<DeletedEmails, Long> {
     @Modifying
     @Transactional
-    @Query("DELETE FROM DeletedEmails d WHERE d.user.username = :username AND d.receivedDate = :receivedDate")
     void deleteByUserUsernameAndReceivedDate(@Param("username") String username, @Param("receivedDate") Date receivedDate);
 
     List<DeletedEmails> findByUserUsername(String username);
