@@ -217,9 +217,7 @@ public class Pop3Agent {
             messages = filteredMessageList.toArray(new Message[0]);
 
             if(page*pageSize < messages.length){
-                for(int j = 0, i=(page-1)*pageSize; i<page*pageSize; i++, j++) {
-                    tempList.add(messages[i]);
-                }
+                tempList.addAll(Arrays.asList(messages).subList((page - 1) * pageSize, page * pageSize));
             }
             else{
                 for(int j = 0, i=(page-1)*pageSize; i<messages.length; i++, j++) {

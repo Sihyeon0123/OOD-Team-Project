@@ -318,6 +318,11 @@ public class SystemController {
         log.debug("add_user.do: id = {}, password = {}, port = {}",
                 id, password, JAMES_CONTROL_PORT);
 
+        if(password.length() < 8){
+            attrs.addFlashAttribute("msg", "비밀번호는 8자 이상이어야 합니다.");
+            return "redirect:/add_user";
+        }
+
         try {
             String cwd = ctx.getRealPath(".");
             UserAdminAgent agent = new UserAdminAgent(JAMES_HOST, JAMES_CONTROL_PORT, cwd,
