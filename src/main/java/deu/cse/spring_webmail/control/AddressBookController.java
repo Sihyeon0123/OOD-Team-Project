@@ -35,7 +35,8 @@ public class AddressBookController {
     }
 
     @PostMapping("/add_addressbook.do")
-    public String addContact(@RequestParam String name, @RequestParam String email, @RequestParam String phoneNumber) {
+    public String addContact(@RequestParam String name,
+                             @RequestParam String email, @RequestParam String phoneNumber) {
         log.debug("addContact() called...");
         String username = (String)session.getAttribute("userid");
         this.contactService.saveContact(name, email, phoneNumber, username);
@@ -71,7 +72,9 @@ public class AddressBookController {
     }
 
     @PostMapping("/update_address.do")
-    public String updateAddressDO(@RequestParam Long id, @RequestParam String name, @RequestParam String email, @RequestParam String phoneNumber, RedirectAttributes attrs) {
+    public String updateAddressDO(@RequestParam Long id, @RequestParam String name,
+                                  @RequestParam String email, @RequestParam String phoneNumber,
+                                  RedirectAttributes attrs) {
         log.debug("updateAddress() called...");
         String username = (String)session.getAttribute("userid");
         if(contactService.updateContact(username, id, name, email, phoneNumber)) {

@@ -4,15 +4,12 @@
  */
 package deu.cse.spring_webmail.control;
 
-import deu.cse.spring_webmail.entity.DeletedEmails;
-import deu.cse.spring_webmail.entity.Users;
 import deu.cse.spring_webmail.model.Pop3Agent;
 import deu.cse.spring_webmail.model.UserAdminAgent;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -20,7 +17,6 @@ import javax.imageio.ImageIO;
 
 import deu.cse.spring_webmail.model.UserService;
 import deu.cse.spring_webmail.security.MyUserDetailsService;
-import deu.cse.spring_webmail.service.DeletedEmailsService;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
@@ -173,7 +169,7 @@ public class SystemController {
 
     /** 회원가입 페이지 반환 메서드 */
     @GetMapping("/signup")
-    public String redirectToSignUpPage() {
+    public String signUp() {
         return "signup"; // signup.jsp로 이동
     }
 

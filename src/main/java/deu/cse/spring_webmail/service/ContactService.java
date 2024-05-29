@@ -20,7 +20,8 @@ public class ContactService {
     }
 
     /** INSERT INTO contact VALUES (name, email, phoneNumber, Users.username) */
-    public void saveContact(String name, String email, String phoneNumber, String username) {
+    public void saveContact(String name, String email,
+                            String phoneNumber, String username) {
         Users user = new Users();
         user.setUsername(username);
 

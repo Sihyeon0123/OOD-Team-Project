@@ -384,7 +384,8 @@ public class Pop3Agent {
                 for (int i = messages.length; --i >= 0; ) {
                     boolean found = false;
                     for (DeletedEmails deletedEmail : deletedEmailList) {
-                        if (deletedEmail.getReceivedDate().compareTo(messages[i].getSentDate()) != 0) {
+                        if (deletedEmail.getReceivedDate()
+                                .compareTo(messages[i].getSentDate()) != 0) {
                             found = true;
                             break;
                         }
