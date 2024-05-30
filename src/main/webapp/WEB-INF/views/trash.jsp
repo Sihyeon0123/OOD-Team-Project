@@ -38,8 +38,6 @@
         <div id="sidebar">
             <jsp:include page="sidebar_menu.jsp" />
         </div>
-
-        <!-- 메시지 삭제 링크를 누르면 바로 삭제되어 실수할 수 있음. 해결 방법은? -->
         <div id="main">
             <h2>휴지통</h2>
             ${messageList}
