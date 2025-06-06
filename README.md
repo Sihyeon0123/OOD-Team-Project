@@ -10,6 +10,7 @@
 - [유지보수 수행 과정](#유지보수-수행-과정)
 - [주요 기능 및 개선 사항](#주요-기능-및-개선-사항)
 - [기술 스택](#기술-스택)
+- [프로젝트 구조](#프로젝트-구조)
 - [결과 및 기대 효과](#결과-및-기대-효과)
 - [부록](#부록)
 
@@ -104,24 +105,64 @@
         - SpotBugs 정적 분석: SpotBugs 정적 분석도구를 통해서 Bad practice(나쁜 습관), Dodgy code(잠재적 버그), Malicious code vulnerability(악성 코드 취약성), Internationalization(국제화) 등 현재에는 문제가 되지 않지만 미래에 문제가 발생할 수 있는 부분들을 파악하였습니다.   
         ![image](https://github.com/user-attachments/assets/45c01bb1-9900-4251-93bb-0975147678a8)
 
-## **기술 스택**: 
-기술 스택
+## **기술 스택**:
 본 프로젝트는 James Web Mail Server의 유지보수를 위해 다음과 같은 기술 스택을 활용했습니다.
 
-- 백엔드:
-    - Java: 핵심 프로그래밍 언어
-    - Spring Boot: 웹 애플리케이션 개발 및 RESTful API 구축을 위한 프레임워크
-    - Apache James: 메일 서버 기능 (SMTP, POP3)
-- 데이터베이스:
-    - MySQL
-- 프론트엔드:
-    - HTML5, CSS3, JavaScript: 웹 인터페이스 구현
-    - 템플릿 엔진: JSP
-- 개발 도구 및 환경:
-    - IDE: IntelliJ IDEA
-    - 버전 관리: Git, GitHub
-    - 빌드 도구: Maven
-    - 정정 분석 도구: SpotBugs
+- **백엔드**:
+    - **Java**: 핵심 프로그래밍 언어
+    - **Spring Boot**: 웹 애플리케이션 개발 및 RESTful API 구축을 위한 프레임워크
+    - **Apache James**: 메일 서버 기능 (SMTP, POP3)
+- **데이터베이스**:
+    - **MySQL**
+- **프론트엔드**:
+    - **HTML5, CSS3, JavaScript**: 웹 인터페이스 구현
+    - **템플릿 엔진**: JSP
+- **개발 도구 및 환경**:
+    - **IDE**: IntelliJ IDEA
+    - **버전 관리**: Git, GitHub
+    - **빌드 도구**: Maven
+    - **정적 분석 도구**: SpotBugs
+
+
+## 프로젝트 구조
+```shell
+OOD-Team-Project/
+├──.gitignore
+├── pom.xml
+├── README.md
+├── docs/
+│   ├── 1_REPORT/
+│   │   ├── OOD-1.프로젝트계획서(전공설계).hwp
+│   │   ├── OOD-2.프로젝트결과보고서-4조.hwp
+│   │   └── 발표자료.pptx
+│   ├── 2_MEETING/
+│   │   └── OOD-2.회의록-4조-XX주차(전공설계).hwp  # 여러 회의록 파일 포함
+│   └── 3_TOOLS/
+│       ├── LJM-OOD-웹메일시스템-분석-테스트케이스-4조.xlsx
+│       └── LJM-QA.01-객체지향설계-프로젝트모니터링도구-4조.xlsx
+└── src/
+    └── main/
+        ├── java/
+        │   └── deu/cse/spring_webmail/
+        │       ├── control/    # 컨트롤러 클래스
+        │       ├── entity/     # 엔티티 클래스 (도메인 모델)
+        │       ├── model/      # 비즈니스 로직 및 메일 처리 관련 모델
+        │       ├── repository/ # 데이터 접근 계층
+        │       ├── security/   # 보안 관련 설정 및 서비스
+        │       └── service/    # 서비스 계층
+        ├── resources/
+        │   ├── static/         # 정적 자원 (CSS 등)
+        │   └── application.properties # 애플리케이션 설정
+        └── webapp/
+            └── WEB-INF/
+                ├── upload/     # 첨부파일 저장 경로
+                └── views/      # JSP 뷰 파일
+                    ├── address/
+                    ├── admin/
+                    ├── img_test/
+                    ├── read_mail/
+                    └── write_mail/
+```
 
 
 ## **결과 및 기대 효과**
