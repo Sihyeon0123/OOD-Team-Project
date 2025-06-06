@@ -1,0 +1,82 @@
+<mxfile host="app.diagrams.net" modified="2024-05-24T13:46:35.808Z" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36" etag="GmNvqrSy_FNyY5f9UJ_F" version="24.4.8" type="device">
+  <diagram name="페이지-1" id="Je-_OHNlh_g1_6TXLKW8">
+    <mxGraphModel dx="1129" dy="1606" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="scVELLx160ETukuN71GO-1" value="Actor" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;" parent="1" vertex="1">
+          <mxGeometry y="90" width="30" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="scVELLx160ETukuN71GO-3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;endArrow=none;endFill=0;" parent="1" source="scVELLx160ETukuN71GO-2" target="scVELLx160ETukuN71GO-1" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="scVELLx160ETukuN71GO-5" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;endArrow=none;endFill=0;" parent="1" source="scVELLx160ETukuN71GO-2" target="scVELLx160ETukuN71GO-4" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="scVELLx160ETukuN71GO-2" value=":main_menu" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+          <mxGeometry x="190" y="90" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="scVELLx160ETukuN71GO-4" value=":ReadController" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+          <mxGeometry x="460" y="90" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="scVELLx160ETukuN71GO-9" style="rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;endArrow=none;endFill=0;" parent="1" source="scVELLx160ETukuN71GO-6" target="scVELLx160ETukuN71GO-4" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="scVELLx160ETukuN71GO-6" value="Pop3Agent" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+          <mxGeometry x="710" y="90" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="scVELLx160ETukuN71GO-21" style="rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;endArrow=none;endFill=0;" parent="1" source="scVELLx160ETukuN71GO-7" target="scVELLx160ETukuN71GO-6" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="scVELLx160ETukuN71GO-7" value=":DeletedEmailsService" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+          <mxGeometry x="700" y="220" width="140" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="scVELLx160ETukuN71GO-10" value="" style="endArrow=classic;html=1;rounded=0;" parent="1" edge="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="40" y="110" as="sourcePoint" />
+            <mxPoint x="180" y="110" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="scVELLx160ETukuN71GO-11" value="1: &amp;lt;&amp;lt;submit&amp;gt;&amp;gt; searchForm(keyword, category)" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" parent="1" vertex="1">
+          <mxGeometry x="30" y="70" width="160" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="scVELLx160ETukuN71GO-12" value="1.1: search(keyword, category)" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" parent="1" vertex="1">
+          <mxGeometry x="320" y="80" width="130" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="scVELLx160ETukuN71GO-13" value="" style="endArrow=classic;html=1;rounded=0;" parent="1" edge="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="320" y="110" as="sourcePoint" />
+            <mxPoint x="440" y="110" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="scVELLx160ETukuN71GO-15" value="" style="endArrow=classic;html=1;rounded=0;" parent="1" edge="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="780" y="160" as="sourcePoint" />
+            <mxPoint x="780" y="210" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="scVELLx160ETukuN71GO-16" value="1.1.1.1: findByusername(username)" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" parent="1" vertex="1">
+          <mxGeometry x="790" y="170" width="200" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="scVELLx160ETukuN71GO-17" value="" style="endArrow=classic;html=1;rounded=0;" parent="1" edge="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="590" y="110" as="sourcePoint" />
+            <mxPoint x="700" y="110" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="scVELLx160ETukuN71GO-20" value="1.1.1: searchMailList = getSearchList(keyword, category)" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" parent="1" vertex="1">
+          <mxGeometry x="550" y="60" width="210" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="LQfNxV3l7VVuelYGsvDv-1" value="" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="440" y="130" as="sourcePoint" />
+            <mxPoint x="320" y="130" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="LQfNxV3l7VVuelYGsvDv-2" value="1.2: &amp;lt;&amp;lt;view&amp;gt;&amp;gt;" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="325" y="130" width="120" height="30" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

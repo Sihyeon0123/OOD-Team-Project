@@ -1,0 +1,28 @@
+<mxfile host="app.diagrams.net" modified="2024-05-18T12:55:58.683Z" agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36" etag="BotmNU4C74MqHU-tlKGO" version="24.4.4" type="device">
+  <diagram name="페이지-1" id="Tl1EDFXQJ8jeWquXhCG1">
+    <mxGraphModel dx="453" dy="389" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="dFMMCK2fwR-tE2H0vfOa-16" value="ReadController" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="290" y="30" width="110" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="dFMMCK2fwR-tE2H0vfOa-17" value="" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="290" y="50" width="110" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="dFMMCK2fwR-tE2H0vfOa-18" value="" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="450" y="50" width="120" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="dFMMCK2fwR-tE2H0vfOa-19" value="Pop3Agent" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="450" y="30" width="120" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="dFMMCK2fwR-tE2H0vfOa-21" value="" style="endArrow=none;html=1;rounded=0;entryX=0;entryY=0;entryDx=0;entryDy=0;exitX=1;exitY=0;exitDx=0;exitDy=0;" edge="1" parent="1" source="dFMMCK2fwR-tE2H0vfOa-17" target="dFMMCK2fwR-tE2H0vfOa-18">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="390" y="60" as="sourcePoint" />
+            <mxPoint x="440" y="10" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
